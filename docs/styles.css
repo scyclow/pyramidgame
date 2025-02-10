@@ -1,0 +1,117 @@
+
+:root {
+  --bg-color: #000;
+  --font-color: #fff;
+  --accent-color: #fff;
+  --tertiary-color: #fff;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+/*  scrollbar-color: darkgray black;
+  scrollbar-width: thin;*/
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--font-color);
+  animation: FadeIn 0.75s linear;
+}
+
+main {
+  padding: 0 1.2rem;
+}
+
+header, main, footer, section {
+  max-width: 780px;
+  margin: auto;
+}
+
+footer {
+  text-align: center;
+}
+
+p {
+  margin-bottom: 1em;
+  line-height: 1.7;
+}
+
+img {
+  max-width: 100%;
+  display: inline-block;
+}
+
+button, img {
+  user-select: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button, select, label, input[type="range"], input[type="checkbox"] {
+  cursor: pointer;
+}
+
+
+button:disabled {
+  user-select: none;
+  cursor: no-drop;
+}
+
+
+
+
+.label {
+  text-transform: uppercase;
+  font-size: 0.75em;
+  font-weight: bold;
+}
+
+.address {
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+
+@keyframes FadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.blink {
+  animation: Blink 1.5s steps(2, start) infinite;
+}
+
+@keyframes Blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+
+@media(max-width: 600px) {
+
+}
+
+@media(max-width: 500px) {
+
+}
+
+
+::selection {
+  background: #fff;
+  color: var(--bg-color);
+}
