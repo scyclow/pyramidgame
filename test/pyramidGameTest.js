@@ -67,9 +67,15 @@ describe('PyramidGame', () => {
 
     const PyramidGameFactory = await ethers.getContractFactory('PyramidGame', signers[0])
     const PyramidGameLeadersFactory = await ethers.getContractFactory('PyramidGameLeaders', signers[0])
+    const PyramidGameLeaderURIFactory = await ethers.getContractFactory('PyramidGameLeaderURI', signers[0])
 
+    PyramidGameLeaderURI = await PyramidGameLeaderURIFactory.deploy()
+    await PyramidGameLeaderURI.deployed()
 
-    PyramidGame = await PyramidGameFactory.deploy()
+    const initialAmount = ethers.utils.parseEther('0.01')
+    const colors = ['#000', '#46ff5a', '#283fff', '#ff1b1b']
+
+    PyramidGame = await PyramidGameFactory.deploy(initialAmount, colors, PyramidGameLeaderURI.address)
     await PyramidGame.deployed()
     PyramidGameLeaders = await PyramidGameLeadersFactory.attach(
       await PyramidGame.leaders()

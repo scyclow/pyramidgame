@@ -49,12 +49,26 @@ contract PyramidGame is ERC20 {
   uint256 constant public TOKENS_PER_ETH = 100_000;
 
   PyramidGameLeaders public leaders;
+  address[] public children;
+  bool private initialized;
 
   event Contribution(address indexed sender, uint256 amount);
   event Distribution(address indexed recipient, uint256 amount);
+  event ChildPyramidDeployed(address indexed childAddress, address indexed deployer, uint256 initialAmount);
 
-  constructor() ERC20("Pyramid Game", "PYRAMID") {
-    leaders = new PyramidGameLeaders(msg.sender, SLOTS);
+  constructor(uint256 initialAmount, string[4] memory colors, address uri) ERC20("Pyramid Game", "PYRAMID") {
+    initialize(msg.sender, initialAmount, colors, uri);
+  }
+
+  /// @notice Initialize the Pyramid Game instance
+  /// @dev Can only be called once. Called by constructor for normal deployments, or manually for proxy clones
+  /// @param deployer The address that will receive the first leader NFT
+  /// @param initialAmount The initial contribution amount for token 0
+  /// @param colors Array of 4 hex color strings for the NFTs
+  function initialize(address deployer, uint256 initialAmount, string[4] memory colors, address uri) public {
+    require(!initialized, "Already initialized");
+    initialized = true;
+    leaders = new PyramidGameLeaders(deployer, SLOTS, initialAmount, colors, uri);
   }
 
 
@@ -207,8 +221,65 @@ contract PyramidGame is ERC20 {
     locked = false;
   }
 
+
+
+  ////// CHILD PYRAMID DEPLOYMENT
+
+  // TODO: deployChildPyramidGame should be payable. msg.value is used as initial amount,
+  // and that is used to go through the contribution work flow, with the child pyramid game as the caller
+
+  /// @notice Deploy a minimal proxy clone of this Pyramid Game
+  /// @dev Uses EIP-1167 minimal proxy pattern - the clone will delegate all calls to this contract's code
+  /// @param initialAmount The initial contribution amount for token 0 in the child pyramid
+  /// @param colors Array of 4 hex color strings for the child pyramid's NFTs
+  /// @return clone The address of the newly deployed minimal proxy
+  function deployChildPyramidGame(
+    uint256 initialAmount,
+    string[4] memory colors,
+    address uriContract
+  ) external returns (address payable clone) {
+    // Create EIP-1167 minimal proxy that delegates to this contract
+    bytes20 targetBytes = bytes20(address(this));
+    assembly {
+      // Get free memory pointer
+      let cloneContract := mload(0x40)
+
+      // Store first part of proxy bytecode (initialization + runtime header)
+      mstore(cloneContract, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+
+      // Store the implementation address (this contract)
+      mstore(add(cloneContract, 0x14), targetBytes)
+
+      // Store second part of proxy bytecode (runtime footer)
+      mstore(add(cloneContract, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+
+      // Deploy the proxy contract (55 bytes total)
+      clone := create(0, cloneContract, 0x37)
+    }
+    require(clone != address(0), "Clone deployment failed");
+
+    // Initialize the clone with custom parameters
+    // The clone delegates to this contract's code but uses its own storage
+    PyramidGame(clone).initialize(msg.sender, initialAmount, colors, uriContract);
+
+    children.push(clone);
+    emit ChildPyramidDeployed(clone, msg.sender, initialAmount);
+  }
+
+  /// @notice Get the total number of child pyramids
+  /// @return The count of child pyramids
+  function totalChildren() external view returns (uint256) {
+    return children.length;
+  }
+
+  // TODO: a majority of leaders can send an ERC20 or ERC721
+
 }
 
+
+interface ITokenURI {
+  function tokenURI(uint256 tokenId, address leaders) external view returns (string memory);
+}
 
 
 /// @title Pyramid Game
@@ -220,17 +291,20 @@ contract PyramidGameLeaders is ERC721 {
   uint256 public reinvestedTotal;
   uint256 public totalSupply = 1;
   uint256 public SLOTS;
+  string[4] public colors;
+  ITokenURI public uri;
 
   mapping(uint256 => bool) public isReinvested;
   mapping(uint256 => address) public recipientOf;
   mapping(uint256 => uint256) public contributions;
 
-  constructor(address deployer, uint256 slots) ERC721("Pyramid Game Leader", "LEADER"){
+  constructor(address deployer, uint256 slots, uint256 initialAmount, string[4] memory _colors, address uri) ERC721("Pyramid Game Leader", "LEADER"){
     root = msg.sender;
     SLOTS = slots;
+    colors = _colors;
 
     _mint(deployer, 0);
-    incrementContributionBalance(0, 0.01 ether);
+    incrementContributionBalance(0, initialAmount);
   }
 
 
@@ -323,63 +397,8 @@ contract PyramidGameLeaders is ERC721 {
 
   /// METADATA
 
-
-
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-    string memory tokenString = Strings.toString(tokenId);
-
-    bytes memory encodedSVG = abi.encodePacked(
-      'data:image/svg+xml;base64,',
-      Base64.encode(abi.encodePacked(rawSVG(tokenId)))
-    );
-
-
-    return string(abi.encodePacked(
-      'data:application/json;utf8,'
-      '{"name": "Pyramid Game: Leader #', tokenString,
-      '", "description": "'
-      '", "license": "CC0'
-      '", "image": "', encodedSVG,
-      '", "attributes": [{ "trait_type": "Leader Token Contributions", "value": "', Strings.toString(contributions[tokenId]), ' wei" }]'
-      '}'
-    ));
-  }
-
-  function rawSVG(uint256 tokenId) public view returns (string memory) {
-    string memory green = '#46ff5a';
-    string memory black = '#000';
-    string memory blue = '#283fff';
-    string memory red = '#ff1b1b';
-
-    string[2][12] memory colors = [
-      [black, green],
-      [blue, green],
-      [red, green],
-
-      [blue, black],
-      [red, black],
-      [green, black],
-
-      [red, blue],
-      [green, blue],
-      [black, blue],
-
-      [green, red],
-      [black, red],
-      [blue, red]
-    ];
-
-
-    return string.concat(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 487 487">'
-        '<style>*{stroke:', colors[tokenId][0],';fill:', colors[tokenId][1],'}</style>'
-        '<rect width="100%" height="100%" x="0" y="0" stroke-width="0"></rect>'
-        '<path d="M465.001 435.5H244.995H20.5L242.75 50L465.001 435.5Z"  stroke-width="14"/>'
-        '<path d="M205.5 348C216 357 227.513 359.224 243.001 359.999C293 362.5 301.001 294.999 243.001 293.499C185.001 291.999 196.5 224.5 243.001 229.998C243.001 229.998 259.5 229.998 276.5 244"  stroke-width="14" stroke-linecap="square"/>'
-        '<line x1="242.5" y1="201" x2="242.5" y2="386"  stroke-width="14"/>'
-      '</svg>'
-    );
-
+    return uri.tokenURI(tokenId, address(this));
   }
 
 
@@ -389,5 +408,65 @@ contract PyramidGameLeaders is ERC721 {
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721) returns (bool) {
     // ERC2981 & ERC4906
     return interfaceId == bytes4(0x2a55205a) || interfaceId == bytes4(0x49064906) || super.supportsInterface(interfaceId);
+  }
+}
+
+
+contract PyramidGameLeaderURI {
+  function tokenURI(uint256 tokenId, PyramidGameLeaders leaders) public view returns (string memory) {
+    string memory tokenString = Strings.toString(tokenId);
+
+    bytes memory encodedSVG = abi.encodePacked(
+      'data:image/svg+xml;base64,',
+      Base64.encode(abi.encodePacked(rawSVG(tokenId, leaders)))
+    );
+
+
+    return string(abi.encodePacked(
+      'data:application/json;utf8,'
+      '{"name": "Pyramid Game: Leader #', tokenString,
+      '", "description": "'
+      '", "license": "CC0'
+      '", "image": "', encodedSVG,
+      '", "attributes": [{ "trait_type": "Leader Token Contributions", "value": "', Strings.toString(leaders.contributions(tokenId)), ' wei" }]'
+      '}'
+    ));
+  }
+
+  function rawSVG(uint256 tokenId, PyramidGameLeaders leaders) public view returns (string memory) {
+    string memory color0 = leaders.colors(0);
+    string memory color1 = leaders.colors(1);
+    string memory color2 = leaders.colors(2);
+    string memory color3 = leaders.colors(3);
+
+    string[2][12] memory colorPairs = [
+      [color0, color1],
+      [color2, color1],
+      [color3, color1],
+
+      [color2, color0],
+      [color3, color0],
+      [color1, color0],
+
+      [color3, color2],
+      [color1, color2],
+      [color0, color2],
+
+      [color1, color3],
+      [color0, color3],
+      [color2, color3]
+    ];
+
+// TODO put some indication that token is reinvested
+    return string.concat(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 487 487">'
+        '<style>*{stroke:', colorPairs[tokenId][0],';fill:', colorPairs[tokenId][1],'}</style>'
+        '<rect width="100%" height="100%" x="0" y="0" stroke-width="0"></rect>'
+        '<path d="M465.001 435.5H244.995H20.5L242.75 50L465.001 435.5Z"  stroke-width="14"/>'
+        '<path d="M205.5 348C216 357 227.513 359.224 243.001 359.999C293 362.5 301.001 294.999 243.001 293.499C185.001 291.999 196.5 224.5 243.001 229.998C243.001 229.998 259.5 229.998 276.5 244"  stroke-width="14" stroke-linecap="square"/>'
+        '<line x1="242.5" y1="201" x2="242.5" y2="386"  stroke-width="14"/>'
+      '</svg>'
+    );
+
   }
 }
