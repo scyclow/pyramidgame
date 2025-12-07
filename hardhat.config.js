@@ -17,6 +17,12 @@ module.exports = {
           evmVersion: `cancun`,
         }
       },
+      {
+        version: "0.8.30",
+        settings: {
+          evmVersion: `osaka`,
+        }
+      },
     ]
   },
   networks: {

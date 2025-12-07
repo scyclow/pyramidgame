@@ -26,7 +26,7 @@ by steviep.eth
 
 import "./Dependencies.sol";
 
-pragma solidity ^0.8.28;
+pragma solidity ^0.8.30;
 
 
 /// @title Pyramid Game
