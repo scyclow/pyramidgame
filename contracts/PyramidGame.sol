@@ -546,7 +546,7 @@ contract TokenURI {
   function rawSVG(uint256 tokenId) public view returns (string memory) {
     string memory color0 = '#000';
     string memory color1 = '#46ff5a';
-    string memory color2 = '#283fff';
+    string memory color2 = '#001cff';
     string memory color3 = '#ff1b1b';
 
     string[2][12] memory colorPairs = [
@@ -571,12 +571,12 @@ contract TokenURI {
 
 
     return string.concat(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 487 487">'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 576">'
         '<style>*{stroke:', colorPairs[tokenIx][0],';fill:', colorPairs[tokenIx][1],'}</style>'
-        '<rect width="100%" height="100%" x="0" y="0" stroke-width="0"></rect>'
-        '<path d="M465.001 435.5H244.995H20.5L242.75 50L465.001 435.5Z"  stroke-width="14"/>'
-        '<path d="M205.5 348C216 357 227.513 359.224 243.001 359.999C293 362.5 301.001 294.999 243.001 293.499C185.001 291.999 196.5 224.5 243.001 229.998C243.001 229.998 259.5 229.998 276.5 244"  stroke-width="14" stroke-linecap="square"/>'
-        '<line x1="242.5" y1="201" x2="242.5" y2="386"  stroke-width="14"/>'
+        '<rect width="562" height="562" x="7" y="7" stroke-width="14"></rect>'
+        '<path d="M509.501 480H289.495H65L287.25 94.5L509.501 480Z"  stroke-width="14"/>'
+        '<path d="M250 392.5C260.5 401.5 272.013 403.724 287.501 404.499C337.5 407 345.501 339.499 287.501 337.999C229.501 336.499 241 269 287.501 274.498C287.501 274.498 304 274.498 321 288.5"  stroke-width="14" stroke-linecap="square"/>'
+        '<line x1="287" y1="245.5" x2="287" y2="430.5"  stroke-width="14"/>'
       '</svg>'
     );
 

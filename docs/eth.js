@@ -33,7 +33,7 @@ export const addEtherscanLink = (contract, chain) => l => {
   l.href = `https://${etherscanLink}/address/${contractAddr}#code`
 }
 
-export const addEtherscanLinks = (cls, contract, chain) => {
+export const addEtherscanLinks = (cls, contract, chain='mainnet') => {
   $.cls(cls).forEach(addEtherscanLink(contract, chain))
 }
 
@@ -43,12 +43,12 @@ export class Web3Provider {
   onConnectCbs = []
   ens = ''
 
-  FORCED_CHAIN_ID = '0x2105'
+  FORCED_CHAIN_ID = '0x7a69'
   VALID_CHAINS = [
     // '0x1', // mainnet
     '0x7a69', // local
-    '0xaa36a7', // sepolia
-    '0x2105', // base
+    // '0xaa36a7', // sepolia
+    // '0x2105', // base
     // '0x14a34', // base sepolia
     // '0xa4b1', // arbitrum
   ]
@@ -209,6 +209,11 @@ export class Web3Provider {
     }
   }
 
+  isENS(ens) {
+    return isENS(ens)
+  }
+
+
   isAddress(addr) {
     return ethers.utils.isAddress(addr)
   }
@@ -221,6 +226,10 @@ export class Web3Provider {
     return this.provider.lookupAddress(addr)
   }
 
+  async fromENS(ens) {
+    return this.provider.resolveName(ens)
+  }
+
   async getTransactionCount(addr) {
     return this.provider.getTransactionCount(addr)
   }
@@ -230,7 +239,7 @@ export class Web3Provider {
     try {
       const ens = await this.getENS(addr)
       if (isENS(ens)) {
-        return ens.length > nameLength
+        return ens.length > nameLength && truncate
           ? ens.slice(0, nameLength-3) + '...'
           : ens
       } else {
@@ -242,7 +251,7 @@ export class Web3Provider {
   }
 
   async getETHBalance(addr) {
-    return (await this.provider.getBalance(addr)) / 1e18
+    return ethVal(await this.provider.getBalance(addr))
   }
 
   async getNetwork() {
@@ -315,4 +324,3 @@ export class Web3Provider {
 export const provider = new Web3Provider()
 
 window.__provider = provider
-

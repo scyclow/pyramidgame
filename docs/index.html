@@ -60,7 +60,7 @@
     }
 
     button:hover {
-      color: var(--font-color);
+      color: var(--bg-color);
       background: var(--accent-color);
       border-color: var(--accent-color);
     }
@@ -92,9 +92,13 @@
       border-spacing: 0;
     }
 
-    td {
+    td, th {
       border: 1px solid;
       padding: 0.5em;
+    }
+
+    th {
+      font-weight: 600;
     }
 
     section {
@@ -145,7 +149,7 @@
 
     sup a:hover {
       background: var(--accent-color);
-      color: var(--font-color);
+      color: var(--accent-color);
       border-color: var(--accent-color);
 
       text-decoration: none;
@@ -192,10 +196,200 @@
       .scanlink {
         font-size: 0.9em;
       }
+    }
 
-      #leaderboard {
-        font-size: 0.7em;
+    .contribution-row {
+      border: 2px solid var(--font-color);
+      padding: 1em;
+      margin-bottom: 0.5em;
+      line-height: 1.5;
+      display: block;
+      text-decoration: none;
+      color: var(--font-color);
+    }
+
+    .contribution-row:hover {
+      background: var(--font-color);
+      color: var(--bg-color);
+    }
+
+    .contribution-row:hover .address {
+      color: var(--bg-color);
+    }
+
+    .contribution-amount {
+      font-weight: 600;
+    }
+
+    /* Grid Leaderboard Styles */
+    .leaderboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0em;
+      max-width: 1200px;
+      margin: 2em auto;
+      padding: 0 1em;
+    }
+
+    @media (max-width: 1110px) {
+      .leaderboard-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
+    }
+
+    @media (max-width: 740px) {
+      .leaderboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 580px) {
+      .leaderboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .leader-card {
+      border: 0 solid var(--font-color);
+      border-left-width: 6px;
+      border-bottom-width: 6px;
+      padding: 1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75em;
+      /*background: var(--font-color);*/
+      /*color: var(--bg-color);*/
+    }
+    .leader-card .address {
+      /*color: var(--bg-color);*/
+    }
+
+    /* 4 columns - rightmost column (every 4th) gets right border */
+    .leader-card:nth-child(4n) {
+      border-right-width: 6px;
+    }
+    /* 4 columns - top row (first 4) gets top border */
+    .leader-card:nth-child(-n+4) {
+      border-top-width: 6px;
+    }
+
+    @media (max-width: 1110px) {
+      /* 3 columns - reset 4-column rules */
+      .leader-card:nth-child(4n) {
+        border-right-width: 0;
+      }
+      .leader-card:nth-child(-n+4) {
+        border-top-width: 0;
+      }
+      /* 3 columns - rightmost column (every 3rd) gets right border */
+      .leader-card:nth-child(3n) {
+        border-right-width: 6px;
+      }
+      /* 3 columns - top row (first 3) gets top border */
+      .leader-card:nth-child(-n+3) {
+        border-top-width: 6px;
+      }
+    }
+
+    @media (max-width: 740px) {
+      /* 2 columns - reset 3-column rules */
+      .leader-card:nth-child(3n) {
+        border-right-width: 0;
+      }
+      .leader-card:nth-child(-n+3) {
+        border-top-width: 0;
+      }
+      /* 2 columns - rightmost column (every 2nd) gets right border */
+      .leader-card:nth-child(2n) {
+        border-right-width: 6px;
+      }
+      /* 2 columns - top row (first 2) gets top border */
+      .leader-card:nth-child(-n+2) {
+        border-top-width: 6px;
+      }
+    }
+
+    @media (max-width: 580px) {
+      /* 1 column - reset 2-column rules and set all items to get right border */
+      .leader-card:nth-child(n) {
+        border-right-width: 6px;
+        border-top-width: 0;
+      }
+      /* 1 column - only first item gets top border */
+      .leader-card:nth-child(1) {
+        border-top-width: 6px;
+      }
+    }
+
+    .leader-card img,
+    .leader-card leader-svg {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      display: block;
+    }
+
+    .leader-info {
+      width: 100%;
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    .leader-info > div {
+      margin: 0.25em 0;
+    }
+
+    .section-box {
+      border: 3px solid var(--font-color);
+      padding: 1.5em;
+      margin: 2em auto;
+      max-width: 800px;
+    }
+
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1em;
+      margin-top: 1em;
+    }
+
+    .token-item {
+      border: 2px solid var(--font-color);
+      padding: 0.5em;
+      text-align: center;
+    }
+
+    .token-item img,
+    .token-item leader-svg {
+      width: 100%;
+      max-width: 120px;
+      display: block;
+    }
+
+    .erc20-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      margin-top: 1em;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 0.5em;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .error-message {
+      color: var(--red-color);
+      margin-top: 0.5em;
+      min-height: 1.5em;
+      font-size: 0.9em;
+    }
+
+    .blinkSlow {
+      animation: Blink 2s steps(2, start) infinite;
     }
 
 
@@ -264,7 +458,7 @@
 
     <h2 style="display: flex; align-items: center; justify-content: center; margin: 1em 0">
       <a class="scanlink">
-        pyramidgame.base.eth<svg xmlns="http://www.w3.org/2000/svg" width="0.6em" viewBox="0 0 156 184" fill="none" style="margin-left: 0.25em; margin-top: 0em;">
+        pyramidgame.eth<svg xmlns="http://www.w3.org/2000/svg" width="0.6em" viewBox="0 0 156 184" fill="none" style="margin-left: 0.25em; margin-top: 0em;">
           <rect x="6" y="6" width="144" height="172" stroke-width="23"/>
           <path d="M32 52H124" stroke-width="15"/>
           <path d="M32 92H124" stroke-width="15"/>
@@ -294,19 +488,36 @@
 
       <connect-wallet>
         <div slot="connected">
-          <table id="leaderboard" style="margin: auto;"></table>
+          <div id="leaderboardStats" style="text-align: center; margin: 1.5em auto; font-size: 1.2em;"></div>
+          <div id="leaderboard" class="leaderboard-grid"></div>
         </div>
 
         <div slot="notConnected">
           <div class="center" style="margin-top: 1em; border: 3px solid; padding: 1.5em">
             <connect-button>
-              <button class="connectButton" slot="button" style="font-size: 1.5em">Connect to view<br> Leaders</button>
+              <button class="connectButton" slot="button" style="font-size: 1.5em">Connect to view<br> Leaderboard</button>
               <div slot="loading" class="slowBlink" style="font-size: 1.5em">Connecting...</div>
             </connect-button>
           </div>
         </div>
       </connect-wallet>
     </div>
+  </section>
+
+  <section>
+    <connect-wallet>
+      <div slot="connected">
+        <div id="userLeaderSection"></div>
+      </div>
+    </connect-wallet>
+  </section>
+
+  <section>
+    <connect-wallet>
+      <div slot="connected">
+        <div id="erc20Section"></div>
+      </div>
+    </connect-wallet>
   </section>
 
   <section>
@@ -340,42 +551,17 @@
     <p>Leaders are determined by </p>
   </section>
 
-  <section>
-    <h2 style="border: 2px dashed; margin-bottom: 0.5em;">Advanced</h2>
-    <h3>Forward<sup><a href="#forward">?</a></sup></h3>
-    <div class="center-v">
-      <input class="tiny-input" placeholder="0x0000000000000000000000000000000000000000" style="width: 27em; max-width: 90vw;">  <button class="tiny-button">Submit</button>
-    </div>
-  </section>
-
-  <section>
-    <h3>Consolidate<sup><a href="#consolidate">?</a></sup></h3>
-    <div class="center-v">
-      <input class="tiny-input" placeholder="0x0000000000000000000000000000000000000000" style="width: 27em; max-width: 90vw;">
-      <input class="tiny-input" placeholder="0.01 Ξ" style="margin-top: 0.25em;">
-      <button class="tiny-button">Submit</button>
-    </div>
-  </section>
-
-  <section>
-    <h3>Delegate</h3>
-    <div class="center-v">
-      <input class="tiny-input" placeholder="0x0000000000000000000000000000000000000000" style="width: 27em; max-width: 90vw;">  <button class="tiny-button">Submit</button>
-    </div>
+  <section class="center-v" id="distributions">
+    <h2>Latest Distributions</h2>
   </section>
 
 
-  <section>
+
+  <footer style="margin: 4em auto;"><a href="https://steviep.xyz" target="_blank" style="text-decoration: underline;">steviep.xyz</a> 2025</footer>
 
 
-    <style type="text/css">
-      .block {
-        padding: 2em;
-      }
-    </style>
 
-
-    <div class="block" style="background: var(--black-color); color: var(--red-color);">
+<!--     <div class="block" style="background: var(--black-color); color: var(--red-color);">
       dsfasdfsadfasdfdasd
     </div>
     <div class="block" style="background: var(--gray-color); color: var(--green-color);">
@@ -409,15 +595,8 @@
     <div class="block" style="background: var(--yellow-color); color: var(--black-color);">
       dsfasdfsadfasdfdasd
     </div>
+ -->
 
-
-  </section>
-
-
-
-  <footer style="margin: 4em auto;"><a href="https://steviep.xyz" target="_blank" style="text-decoration: underline;">steviep.xyz</a> 2025</footer>
-
-    <div id="pyramids"></div>
 
 </body>
 
@@ -428,77 +607,330 @@
   import {CONTRACTS} from './contracts.js'
   import {$} from './$.js'
 
+  // Define leader-svg web component with isolated styles
+  class LeaderSVG extends HTMLElement {
+    constructor() {
+      super()
+      this.attachShadow({ mode: 'open' })
+    }
+
+    connectedCallback() {
+      const svg = this.getAttribute('svg')
+      if (svg) {
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: block;
+              width: 100%;
+              height: auto;
+            }
+            svg {
+              width: 100%;
+              height: auto;
+              display: block;
+            }
+          </style>
+          ${svg}
+        `
+      }
+    }
+  }
+  customElements.define('leader-svg', LeaderSVG)
 
   provider.setContractInfo(CONTRACTS)
 
-  addEtherscanLinks('scanlink', 'PyramidGame', 'base')
+  addEtherscanLinks('scanlink', 'PyramidGame')
 
   provider.onConnect(async (addr) => {
-    const { PyramidGame } = await provider.getContracts('PyramidGame')
+    const { PyramidGame } = await provider.getContracts()
     const { name: chainName, etherscanLink } = await provider.getNetwork()
 
-    const leaders = await Promise.all(times(10, i =>
-      PyramidGame.leaders(i).then(addr => {
-        const prettyAddr = provider.formatAddr(addr)
-        const c = PyramidGame.contributions(addr).then(ethVal)
+    // Get PyramidGameLeaders contract
+    const leadersAddr = await PyramidGame.leaders()
+    const PyramidGameLeaders = await provider.contract(leadersAddr, CONTRACTS.PyramidGameLeaders.abi)
 
-        return Promise.all([
-          addr, prettyAddr, c
-        ])
-      })
-    ))
+    // Get total supply of leader tokens
+    const totalSupply = Number(await PyramidGameLeaders.totalSupply())
+    const contributionTotal = ethVal(await PyramidGameLeaders.contributionTotal())
 
-    const isLeader = await PyramidGame.isLeader(addr)
+    // Helper to extract SVG markup from tokenURI
+    const utf8Clean = raw => raw.replace(/data.*utf8,/, '')
+    const b64Clean = raw => raw.replace(/data.*,/, '')
 
-    const yourContributions = ethVal(await PyramidGame.contributions(addr))
-    const yourDistributions = (await provider.contractEvents(PyramidGame, 'Distribution', [addr, null]))
-      .map(d => ({
-        recipient: d.recipient,
-        amount: ethVal(d.amount)
-      }))
-    const totalReceived = yourDistributions.reduce((a, c) => a + c.amount, 0)
+    const extractSVG = rawURI => {
+      try {
+        const imageDataURI = JSON.parse(utf8Clean(rawURI)).image
+        const svgMarkup = atob(b64Clean(imageDataURI))
+        return svgMarkup
+      } catch (e) {
+        console.error('Error extracting SVG:', e)
+        return ''
+      }
+    }
 
+    // Fetch all leader data
+    const leaders = await Promise.all(times(totalSupply, async i => {
+      const owner = await PyramidGameLeaders.ownerOf(i)
+      const prettyAddr = await provider.formatAddr(owner)
+      const contribution = ethVal(await PyramidGameLeaders.contributions(i))
+      const tokenURI = await PyramidGameLeaders.tokenURI(i)
+      const svg = extractSVG(tokenURI)
+      const percentage = (contribution / contributionTotal) * 100
 
-    const sortedLeaders = leaders.sort((a, b) => b[2] - a[2])
-    const lowestAmount = leaders.at(-1)[2]
-    const totalLeaderSum = leaders.reduce((a, c) => a + c[2], 0)
-    sortedLeaders.forEach(l => l.push(l[2] / totalLeaderSum))
+      return {
+        tokenId: i,
+        owner,
+        prettyAddr,
+        contribution,
+        svg,
+        percentage
+      }
+    }))
 
-    const highliteStyle = 'color: var(--bg-color)'
+    // Sort by contribution (highest first)
+    const sortedLeaders = leaders.sort((a, b) => b.contribution - a.contribution)
+    const lowestLeader = sortedLeaders[sortedLeaders.length - 1]
 
-    $.id('leaderboard').innerHTML = sortedLeaders.map((l, i) => `
-      <tr ${l[0] === addr ? 'style="background: var(--font-color); color: var(--bg-color)"' : ''}>
-        <td>${i+1}.</td>
-        <td>${etherscanAddr(
-          etherscanLink,
-          l[0],
-          l[1],
-          'padding: 0.5em;' + (l[0] === addr ? highliteStyle : '')
-        )}</td>
-        <td style="display: flex; justify-content: space-between"><span style="margin-right: 0.25em">Ξ</span> <span>${l[2].toFixed(2)}</span></td>
-        <td style="text-align: right">${(l[3] * 100).toFixed(2)}%</td>
-      </tr>
-    `).join('')
+    // Calculate total contributions
+    const tokensPerEth = Number(await PyramidGame.TOKENS_PER_ETH())
+    const pyramidTotalSupply = ethVal(await PyramidGame.totalSupply())
+    const pyramidSupplyInEth = pyramidTotalSupply / tokensPerEth
+    const totalContributed = contributionTotal + pyramidSupplyInEth
 
+    // Render stats
+    $.id('leaderboardStats').innerHTML = `
+      <div style="display: flex; justify-content: center; gap: 2em; flex-wrap: wrap;">
+        <div><strong>Leaders:</strong> ${totalSupply}</div>
+        <div><strong>Leader Contributions:</strong> <span style="margin-right: 0.25em">Ξ</span>${contributionTotal.toFixed(4)}</div>
+        <div><strong>Total Contributed:</strong> <span style="margin-right: 0.25em">Ξ</span>${totalContributed.toFixed(4)}</div>
+      </div>
+    `
 
-    $.id('yourContributions').innerHTML = yourContributions > 0
-      ? `
-        <h2><span style="width: 17ch; display: inline-block; text-align: left">You've sent:</span> <span><span style="margin-right: 0.25em">Ξ</span>${yourContributions.toFixed(2)}</span></h2>
-        <h2><span style="width: 17ch; display: inline-block; text-align: left">You've received:</span> <span><span style="margin-right: 0.25em">Ξ</span>${totalReceived.toFixed(2)}</span></h2>
-        ${!isLeader
-          ? `<h2>Send <span style="margin-right: 0.25em">Ξ</span>${(lowestAmount - yourContributions).toFixed(4) || 0.0001} to receive <br>future distributions<h2>`
-          : ''
-        }
-      `
-      : `
-        <div style="margin: 0.5em 0;">
-          <div class="center">
-            <input placeholder="0.01 Ξ" type="number" style="width:10.1em">  <button class="small-button">Send</button>
+    // Render leaderboard grid
+    $.id('leaderboard').innerHTML = sortedLeaders.map(l => {
+      const escapedSVG = l.svg.replace(/"/g, '&quot;')
+      return `
+        <div class="leader-card">
+          <leader-svg svg="${escapedSVG}"></leader-svg>
+          <div class="leader-info">
+            <div><strong>#${l.tokenId}</strong></div>
+            <div>${etherscanAddr(etherscanLink, l.owner, l.prettyAddr)}</div>
+            <div><span style="margin-right: 0.25em">Ξ</span>${l.contribution.toFixed(4)}</div>
+            <div><strong>${l.percentage.toFixed(2)}%</strong></div>
           </div>
-          <p style="max-width: 300px; text-align: center; padding: 0 0.5em; margin: auto;">Send <span style="margin-right: 0.25em">Ξ</span>${lowestAmount.toFixed(4)} to receive future distributions</p>
+        </div>
+      `
+    }).join('')
+
+    // Get user's tokens
+    const userTokens = leaders.filter(l => l.owner.toLowerCase() === addr.toLowerCase())
+
+    // Get user's ERC20 balance
+    const erc20Balance = ethVal(await PyramidGame.balanceOf(addr))
+    const erc20BalanceInEth = erc20Balance / tokensPerEth
+
+    // Render user leader section
+    if (userTokens.length > 0) {
+      $.id('userLeaderSection').innerHTML = `
+        <div class="section-box">
+          <h2>Your Leader Tokens</h2>
+          <div class="token-grid">
+            ${userTokens.map(t => {
+              const escapedSVG = t.svg.replace(/"/g, '&quot;')
+              return `
+                <div class="token-item">
+                  <leader-svg svg="${escapedSVG}"></leader-svg>
+                  <div><strong>#${t.tokenId}</strong></div>
+                  <div><span style="margin-right: 0.25em">Ξ</span>${t.contribution.toFixed(4)}</div>
+                </div>
+              `
+            }).join('')}
+          </div>
+          ${erc20Balance > 0 ? `
+            <div style="margin-top: 2em;">
+              <h3>Add to Leader Contribution</h3>
+              <p>You have ${erc20BalanceInEth.toFixed(4)} Ξ worth of $PYRAMID tokens</p>
+              <div class="control-row">
+                <input id="addContribTokenId" class="tiny-input" placeholder="Token ID" style="width: 8em;">
+                <input id="addContribAmount" class="tiny-input" placeholder="Amount (Ξ)" style="width: 8em;">
+                <button id="addContribBtn" class="tiny-button">Add to Balance</button>
+              </div>
+              <div id="addContribError" class="error-message"></div>
+            </div>
+          ` : ''}
         </div>
       `
 
+      if (erc20Balance > 0) {
+        $.id('addContribBtn').onclick = async () => {
+          $.id('addContribError').innerHTML = 'Pending...'
+          try {
+            const tokenId = Number($.id('addContribTokenId').value)
+            const amount = parseFloat($.id('addContribAmount').value)
+            const tokenAmount = Math.floor(amount * tokensPerEth)
+
+            const tx = await PyramidGame.addToLeaderContributionBalance(tokenId, tokenAmount)
+            $.id('addContribError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
+            await tx.wait(1)
+            $.id('addContribError').innerHTML = 'Success'
+            setTimeout(() => {
+              $.id('addContribError').innerHTML = ''
+              location.reload()
+            }, 2000)
+          } catch (e) {
+            $.id('addContribError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
+            console.error(e)
+          }
+        }
+      }
+    }
+
+    // Render ERC20 section
+    if (erc20Balance > 0) {
+      const canClaimLeadership = erc20BalanceInEth > lowestLeader.contribution
+
+      $.id('erc20Section').innerHTML = `
+        <div class="section-box">
+          <h2>$PYRAMID Tokens</h2>
+          <p style="font-size: 1.5em; margin: 0.5em 0;"><strong>${erc20BalanceInEth.toFixed(4)} Ξ</strong> worth of $PYRAMID</p>
+
+          ${canClaimLeadership ? `
+            <div style="margin-top: 1.5em; padding: 1em; border: 2px solid var(--accent-color);">
+              <h3>Claim Leadership!</h3>
+              <p>You have enough $PYRAMID to claim a leader spot!</p>
+              <button id="claimLeadershipBtn" class="tiny-button">Claim Leadership</button>
+              <div id="claimError" class="error-message"></div>
+            </div>
+          ` : ''}
+
+          <div style="margin-top: 1.5em;">
+            <h3>Transfer $PYRAMID</h3>
+            <div class="control-row">
+              <input id="transferTo" class="tiny-input" placeholder="Recipient Address" style="width: 20em; max-width: 90vw;">
+              <input id="transferAmount" class="tiny-input" placeholder="Amount (Ξ)" style="width: 8em;">
+              <button id="transferBtn" class="tiny-button">Transfer</button>
+            </div>
+            <div id="transferError" class="error-message"></div>
+          </div>
+
+          <div style="margin-top: 1.5em;">
+            <h3>Approve $PYRAMID</h3>
+            <div class="control-row">
+              <input id="approveSpender" class="tiny-input" placeholder="Spender Address" style="width: 20em; max-width: 90vw;">
+              <input id="approveAmount" class="tiny-input" placeholder="Amount (Ξ)" style="width: 8em;">
+              <button id="approveBtn" class="tiny-button">Approve</button>
+            </div>
+            <div id="approveError" class="error-message"></div>
+          </div>
+        </div>
+      `
+
+      if (canClaimLeadership) {
+        $.id('claimLeadershipBtn').onclick = async () => {
+          $.id('claimError').innerHTML = 'Pending...'
+          try {
+            const tx = await PyramidGame.claimLeadership()
+            $.id('claimError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
+            await tx.wait(1)
+            $.id('claimError').innerHTML = 'Success! Reloading...'
+            setTimeout(() => location.reload(), 2000)
+          } catch (e) {
+            $.id('claimError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
+            console.error(e)
+          }
+        }
+      }
+
+      $.id('transferBtn').onclick = async () => {
+        $.id('transferError').innerHTML = 'Pending...'
+        try {
+          const to = $.id('transferTo').value
+          const amount = parseFloat($.id('transferAmount').value)
+          const tokenAmount = Math.floor(amount * tokensPerEth)
+
+          const tx = await PyramidGame.transfer(to, tokenAmount)
+          $.id('transferError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
+          await tx.wait(1)
+          $.id('transferError').innerHTML = 'Success'
+          setTimeout(() => {
+            $.id('transferError').innerHTML = ''
+            location.reload()
+          }, 2000)
+        } catch (e) {
+          $.id('transferError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
+          console.error(e)
+        }
+      }
+
+      $.id('approveBtn').onclick = async () => {
+        $.id('approveError').innerHTML = 'Pending...'
+        try {
+          const spender = $.id('approveSpender').value
+          const amount = parseFloat($.id('approveAmount').value)
+          const tokenAmount = Math.floor(amount * tokensPerEth)
+
+          const tx = await PyramidGame.approve(spender, tokenAmount)
+          $.id('approveError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
+          await tx.wait(1)
+          $.id('approveError').innerHTML = 'Success'
+          setTimeout(() => $.id('approveError').innerHTML = '', 4000)
+        } catch (e) {
+          $.id('approveError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
+          console.error(e)
+        }
+      }
+    }
+
+    // Fetch and render contribution events
+    const contributionEvents = await provider.contractEvents(PyramidGame, 'Contribution', [])
+    const recentContributions = contributionEvents.slice(-20) // Last 20, oldest first
+
+    const timeAgo = timestamp => {
+      const now = Date.now()
+      const diff = Math.floor((now - timestamp) / 1000) // difference in seconds
+
+      if (diff < 60) return `${diff} second${diff === 1 ? '' : 's'} ago`
+      if (diff < 3600) {
+        const mins = Math.floor(diff / 60)
+        return `${mins} minute${mins === 1 ? '' : 's'} ago`
+      }
+      if (diff < 86400) {
+        const hours = Math.floor(diff / 3600)
+        return `${hours} hour${hours === 1 ? '' : 's'} ago`
+      }
+      if (diff < 31536000) {
+        const days = Math.floor(diff / 86400)
+        return `${days} day${days === 1 ? '' : 's'} ago`
+      }
+      const years = Math.floor(diff / 31536000)
+      return `${years} year${years === 1 ? '' : 's'} ago`
+    }
+
+    if (recentContributions.length > 0) {
+      const contributionRows = await Promise.all(recentContributions.map(async event => {
+        const prettySender = await provider.formatAddr(event.sender)
+        const amount = ethVal(event.amount)
+        const block = await provider.provider.getBlock(event.blockNumber)
+        const timeAgoStr = timeAgo(block.timestamp * 1000)
+        return `
+          <a class="contribution-row" href="https://${etherscanLink}/tx/${event.txHash}" target="_blank" rel="nofollow">
+            <span class="address">${prettySender}</span> sent <span class="contribution-amount"><span style="margin-right: 0.25em">Ξ</span>${amount.toFixed(4)}</span> ${timeAgoStr}
+          </a>
+        `
+      }))
+
+      $.id('distributions').innerHTML = `
+        <h2>Latest Contributions</h2>
+        <div style="max-width: 800px; margin: 1em auto;">
+          ${contributionRows.join('')}
+        </div>
+      `
+    } else {
+      $.id('distributions').innerHTML = `
+        <h2>Latest Contributions</h2>
+        <p>No contributions yet</p>
+      `
+    }
 
     addEtherscanLinks('scanlink', 'PyramidGame', chainName)
   })
@@ -538,20 +970,6 @@ const pyramid = (c1, c2) => {
 
 
 
-  $.render($.id('pyramids'), [
-    pyramid(colors[1], colors[0]),
-    pyramid(colors[2], colors[0]),
-    pyramid(colors[3], colors[0]),
-    pyramid(colors[2], colors[1]),
-    pyramid(colors[3], colors[1]),
-    pyramid(colors[0], colors[1]),
-    pyramid(colors[3], colors[2]),
-    pyramid(colors[0], colors[2]),
-    pyramid(colors[1], colors[2]),
-    pyramid(colors[0], colors[3]),
-    pyramid(colors[1], colors[3]),
-    pyramid(colors[2], colors[3]),
-  ].join(''))
 
 
 

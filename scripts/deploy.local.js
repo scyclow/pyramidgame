@@ -15,9 +15,19 @@ async function main() {
 
   await PG(0).contribute(txValue(0.99))
 
-  for (let i = 1; i< 10; i++) await PG(i).contribute(txValue(i + 1))
+  for (let i = 1; i< 13; i++) await PG(i).contribute(txValue(i* 0.01 + 0.01))
 
-  console.log(`PyramidGame:`, PyramidGame.address)
+  await signers[0].sendTransaction({
+    to: '0x8D55ccAb57f3Cba220AB3e3F3b7C9F59529e5a65',
+    ...txValue(10)
+  })
+
+  const leadersAddr = await PyramidGame.leaders()
+  const walletAddr = await PyramidGame.wallet()
+
+  console.log('PyramidGame:', PyramidGame.address)
+  console.log('PyramidGameLeaders:', leadersAddr)
+  console.log('PyramidGameWallet:', walletAddr)
 }
 
 

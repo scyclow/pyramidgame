@@ -89,6 +89,7 @@ createComponent(
 
       .error {
         color: var(--red-color);
+        font-weight: bolder;
       }
     </style>
 
