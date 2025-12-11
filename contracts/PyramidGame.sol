@@ -61,28 +61,56 @@ contract PyramidGame is ERC20 {
   /// @dev Flag to ensure initialize() can only be called once
   bool private initialized;
 
+  /// @dev Custom name and symbol for this instance (allows child pyramids to have custom branding)
+  string private _customName;
+  string private _customSymbol;
+
   event Contribution(address indexed sender, uint256 amount);
   event ChildPyramidDeployed(address indexed childAddress, address indexed deployer, uint256 initialAmount);
 
   constructor() payable ERC20("Pyramid Game", "PYRAMID") {
-    initialize(msg.sender);
+    initialize(msg.sender, '', '', '');
+  }
+
+  /// @notice Returns the name of the token
+  function name() public view virtual override returns (string memory) {
+    return bytes(_customName).length > 0 ? _customName : super.name();
+  }
+
+  /// @notice Returns the symbol of the token
+  function symbol() public view virtual override returns (string memory) {
+    return bytes(_customSymbol).length > 0 ? _customSymbol : super.symbol();
   }
 
 
-
-  //// TODO initialize with different tickers/names, slot numbers
 
   /// @notice Initialize the Pyramid Game instance
   /// @dev Can only be called once. Called by constructor for normal deployments, or manually for proxy clones.
   ///      Creates the Leaders NFT contract and Wallet governance contract.
   ///      The wallet receives msg.value and transfers it to the parent (deployer for root, parent pyramid for children).
   /// @param deployer The address that will receive the first leader NFT (token ID 0)
-  function initialize(address deployer) public payable {
-    require(msg.value > 0, 'Must include a starting bid');
-    require(!initialized, "Already initialized");
+  /// @param gameName The name of the game/ERC20 token (e.g., "Pyramid Game"). Empty string uses default from constructor.
+  /// @param tokenSymbol The symbol of the ERC20 token (e.g., "PYRAMID"). Empty string uses default from constructor.
+  /// @param leaderSymbol The symbol of the leader NFT (e.g., "LEADER"). Empty string uses default "LEADER".
+  function initialize(
+    address deployer,
+    string memory gameName,
+    string memory tokenSymbol,
+    string memory leaderSymbol
+  ) public payable {
+    require(msg.value > 0, 'Must include starting bid');
+    require(!initialized);
     initialized = true;
     parent = msg.sender;
-    leaders = new PyramidGameLeaders(deployer, SLOTS, msg.value);
+    _customName = gameName;
+    _customSymbol = tokenSymbol;
+
+    string memory nftName = bytes(gameName).length > 0
+      ? string(abi.encodePacked(gameName, " Leaderboard"))
+      : "Pyramid Game Leaderboard";
+    string memory nftSymbol = bytes(leaderSymbol).length > 0 ? leaderSymbol : "LEADER";
+
+    leaders = new PyramidGameLeaders(deployer, SLOTS, msg.value, nftName, nftSymbol);
     wallet = new PyramidGameWallet{value: msg.value}(address(this), address(leaders), payable(msg.sender));
   }
 
@@ -234,8 +262,15 @@ contract PyramidGame is ERC20 {
   /// @notice Deploy a minimal proxy clone of this Pyramid Game
   /// @dev Uses EIP-1167 minimal proxy pattern - the clone will delegate all calls to this contract's code
   /// @dev msg.value is used to initialize the child's first leader and contribute to the parent pyramid
+  /// @param gameName The name of the game/ERC20 token for the child pyramid
+  /// @param tokenSymbol The symbol of the ERC20 token for the child pyramid
+  /// @param leaderSymbol The symbol of the leader NFT for the child pyramid
   /// @return clone The address of the newly deployed minimal proxy
-  function deployChildPyramidGame() external payable returns (address payable clone) {
+  function deployChildPyramidGame(
+    string memory gameName,
+    string memory tokenSymbol,
+    string memory leaderSymbol
+  ) external payable returns (address payable clone) {
     // Create EIP-1167 minimal proxy that delegates to this contract
     bytes20 targetBytes = bytes20(address(this));
     assembly {
@@ -254,12 +289,10 @@ contract PyramidGame is ERC20 {
       // Deploy the proxy contract (55 bytes total)
       clone := create(0, cloneContract, 0x37)
     }
-    require(clone != address(0), "Clone deployment failed");
-
-    require(msg.value > 0, 'Must send ETH to deploy child');
+    require(clone != address(0), "Deployment failed");
 
     // Initialize the clone (it will create its own leaders and wallet)
-    PyramidGame(clone).initialize{value: msg.value}(msg.sender);
+    PyramidGame(clone).initialize{value: msg.value}(msg.sender, gameName, tokenSymbol, leaderSymbol);
 
     children.push(clone);
     emit ChildPyramidDeployed(clone, msg.sender, msg.value);
@@ -425,7 +458,13 @@ contract PyramidGameLeaders is ERC721 {
 
   mapping(uint256 => LeaderData) private leaderData;
 
-  constructor(address deployer, uint256 slots, uint256 initialAmount) ERC721("Pyramid Game Leaderboard", "LEADER") {
+  constructor(
+    address deployer,
+    uint256 slots,
+    uint256 initialAmount,
+    string memory leaderName,
+    string memory leaderSymbol
+  ) ERC721(leaderName, leaderSymbol) {
     root = msg.sender;
     SLOTS = slots;
     uri = new TokenURI();

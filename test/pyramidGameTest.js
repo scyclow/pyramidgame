@@ -84,6 +84,13 @@ describe('PyramidGame', () => {
 
 
   describe('init', () => {
+    it('has correct name and symbol', async () => {
+      expect(await PyramidGame.name()).to.equal('Pyramid Game')
+      expect(await PyramidGame.symbol()).to.equal('PYRAMID')
+      expect(await PyramidGameLeaders.name()).to.equal('Pyramid Game Leaderboard')
+      expect(await PyramidGameLeaders.symbol()).to.equal('LEADER')
+    })
+
     it('makes the right payments', async () => {
       const contributions = {0:.01}
       const estimatedWinnings = {[signers[0].address]:0}
@@ -386,7 +393,11 @@ describe('PyramidGame', () => {
 
     it('token uri should work', async () => {
       const uri = await PGL(signers[0]).tokenURI(0)
-      console.log(getJsonURI(uri))
+      const metadata = getJsonURI(uri)
+      console.log(metadata)
+
+      // Verify token name includes the leaderboard name and slot number
+      expect(metadata.name).to.equal('Pyramid Game Leaderboard Slot #0')
 
       for (let i = 1; i < 12; i++) {
         await send(signers[i], PyramidGame, 1)

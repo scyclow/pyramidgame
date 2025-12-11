@@ -853,9 +853,9 @@
   const utf8Clean = raw => raw.replace(/data.*utf8,/, '')
   const b64Clean = raw => raw.replace(/data.*,/, '')
 
-  const extractSVG = rawURI => {
+  const extractSVG = jsonURI => {
     try {
-      const imageDataURI = JSON.parse(utf8Clean(rawURI)).image
+      const imageDataURI = jsonURI.image
       const svgMarkup = atob(b64Clean(imageDataURI))
       return svgMarkup
     } catch (e) {
@@ -912,12 +912,13 @@
       const prettyAddrShort = await provider.formatAddr(owner)
       const prettyAddr = await provider.formatAddr(owner, false)
       const contribution = ethVal(await PyramidGameLeaders.contributions(i))
-      const tokenURI = await PyramidGameLeaders.tokenURI(i)
+      const tokenURI = JSON.parse(utf8Clean(await PyramidGameLeaders.tokenURI(i)))
       const svg = extractSVG(tokenURI)
       const percentage = (contribution / leaderContributionTotal) * 100
 
       return {
         tokenId: i,
+        tokenName: tokenURI.name,
         owner,
         prettyAddr,
         prettyAddrShort,
@@ -948,7 +949,7 @@
       const escapedSVG = l.svg.replace(/"/g, '&quot;')
       return `
         <div class="leader-card">
-          <h3>Pyramid Game Leaderboard Slot #${l.tokenId}</h3>
+          <h3>${l.tokenName}</h3>
           <div class="leader-card-content">
             <leader-svg svg="${escapedSVG}" style="${[5,7,9].includes(l.tokenId) ? 'border: 1px solid' : ''}"></leader-svg>
             <div class="leader-info">

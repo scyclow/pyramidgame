@@ -32,7 +32,7 @@ describe('PyramidGame Child Deployment', () => {
       expect(await PyramidGame.totalChildren()).to.equal(0)
 
       // Deploy child with ETH
-      const tx = await PG(signers[1]).deployChildPyramidGame({ value: toETH(0.05) })
+      const tx = await PG(signers[1]).deployChildPyramidGame('Child Game', 'CHILD', 'CHILDL', { value: toETH(0.05) })
       const receipt = await tx.wait()
 
       // Check event was emitted
@@ -45,19 +45,32 @@ describe('PyramidGame Child Deployment', () => {
       // Verify child was added to array
       expect(await PyramidGame.totalChildren()).to.equal(1)
       expect(await PyramidGame.children(0)).to.equal(childAddress)
+
+      // Verify child has custom name and symbol
+      const PyramidGameFactory = await ethers.getContractFactory('PyramidGame')
+      const childPyramid = PyramidGameFactory.attach(childAddress)
+      expect(await childPyramid.name()).to.equal('Child Game')
+      expect(await childPyramid.symbol()).to.equal('CHILD')
+
+      // Verify child leaders has custom name and symbol
+      const childLeadersAddress = await childPyramid.leaders()
+      const PyramidGameLeadersFactory = await ethers.getContractFactory('PyramidGameLeaders')
+      const childLeaders = PyramidGameLeadersFactory.attach(childLeadersAddress)
+      expect(await childLeaders.name()).to.equal('Child Game Leaderboard')
+      expect(await childLeaders.symbol()).to.equal('CHILDL')
     })
 
     it('deploys multiple children and tracks them all', async () => {
       // Deploy three children
-      const tx1 = await PG(signers[0]).deployChildPyramidGame({ value: toETH(0.01) })
+      const tx1 = await PG(signers[0]).deployChildPyramidGame('Child 1', 'CHILD1', 'C1', { value: toETH(0.01) })
       const receipt1 = await tx1.wait()
       const child1 = receipt1.events.find(e => e.event === 'ChildPyramidDeployed').args.childAddress
 
-      const tx2 = await PG(signers[1]).deployChildPyramidGame({ value: toETH(0.01) })
+      const tx2 = await PG(signers[1]).deployChildPyramidGame('Child 2', 'CHILD2', 'C2', { value: toETH(0.01) })
       const receipt2 = await tx2.wait()
       const child2 = receipt2.events.find(e => e.event === 'ChildPyramidDeployed').args.childAddress
 
-      const tx3 = await PG(signers[2]).deployChildPyramidGame({ value: toETH(0.01) })
+      const tx3 = await PG(signers[2]).deployChildPyramidGame('Child 3', 'CHILD3', 'C3', { value: toETH(0.01) })
       const receipt3 = await tx3.wait()
       const child3 = receipt3.events.find(e => e.event === 'ChildPyramidDeployed').args.childAddress
 
@@ -75,7 +88,7 @@ describe('PyramidGame Child Deployment', () => {
 
     it('child wallet receives parent tokens when deployed with ETH', async () => {
       // Deploy child with ETH - this initializes child AND contributes to parent
-      const tx = await PG(signers[0]).deployChildPyramidGame({ value: toETH(1) })
+      const tx = await PG(signers[0]).deployChildPyramidGame('Child Game', 'CHILD', 'CHILDL', { value: toETH(1) })
       const receipt = await tx.wait()
       const childAddress = receipt.events.find(e => e.event === 'ChildPyramidDeployed').args.childAddress
 
@@ -116,7 +129,7 @@ describe('PyramidGame Child Deployment', () => {
 
       // Step 2: Deploy child game with 0.75 ETH (not enough to claim leadership)
       const childDeployer = signers[13]
-      const txDeploy = await PG(childDeployer).deployChildPyramidGame(txValue(0.75))
+      const txDeploy = await PG(childDeployer).deployChildPyramidGame('Child Game', 'CHILD', 'CHILDL', txValue(0.75))
       const receiptDeploy = await txDeploy.wait()
       const childAddress = receiptDeploy.events.find(e => e.event === 'ChildPyramidDeployed').args.childAddress
 
