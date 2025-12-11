@@ -57,7 +57,7 @@
 
     button {
       background: var(--gray-color);
-      color: var(--black-color);
+      color: var(--font-color);
       border: 0.15em solid var(--font-color);
       padding: 0.5em 1em;
       font-size: 2em;
@@ -123,9 +123,13 @@
 
     nav a {
       color: var(--bg-color);
+      display: inline-block;
+      padding: 0.25em;
     }
     nav a:hover {
-      color: var(--accent-color);
+      color: var(--font-color);
+      background: var(--bg-color);
+      text-decoration: none;
     }
 
     @media(max-width: 740px) {
@@ -220,6 +224,14 @@
       text-decoration: underline;
     }
 
+    .invert {
+      background: var(--font-color);
+      color: var(--bg-color);
+    }
+    .invert a {
+      color: var(--bg-color);
+    }
+
     .scanlink-style {
       border-bottom: 0.1em solid rgba(0, 0, 0, 0);
       font-size: 1.75em;
@@ -302,7 +314,7 @@
     }
 
     leader-svg {
-      border: 1px solid;
+      border: 1px solid var(--dark-border-color);
     }
 
     .small-leaders-grid .bordered {
@@ -674,23 +686,23 @@
 
   <section>
     <nav>
-      <a href="">Send ETH →</a>
-      <a href="">View Leaderboard →</a>
-      <a href="">Docs →</a>
+      <a class="a-normal" href="#send">Send →</a>
+      <a class="a-normal" href="#leaderboard">Leaderboard →</a>
+      <a class="a-normal" href="#docs">Docs →</a>
     </nav>
   </section>
 
   <!-- 1. How It Works -->
-  <section>
+  <section id="send">
     <connect-wallet>
       <div slot="connected">
         <div id="howItWorksSection">
           <div class="section-box">
             <h2>How It Works</h2>
             <ul>
-              <li>Pyramid Game uses cutting edge pyramid scheme technology to redistribute value between players.</li>
+              <li>Pyramid Game is a zero-sum wealth redistirbution game that uses cutting-edge pyramid scheme technology. It is not a financial security.</li>
               <li>All ETH sent to Pyramid Game is split proportionally among the 12 <a href="#leaderboard" class="a-normal">Leaderboard</a> members based on their prior contributions.</li>
-              <li>All Leaderboard positions are represented by NFTs, and all contributions from non-leaders are represented by the $PYRAMID token.</li>
+              <li>Leaderboard positions are represented by NFTs, and contributions from non-leaders are represented by the $PYRAMID token.</li>
             </ul>
             <a href="#docs" class="a-normal" style="margin-left: 1.5em;">Learn More →</a>
           </div>
@@ -763,7 +775,9 @@
 
 
   <section class="center-v" id="disclaimer">
-    <p>All players of Pyramid Game understand that (a) only leaderboard members will receive a portion of Pyramid Game distributions, (b) all distribution amounts are determined by </p>
+    <p>Pyramid Game is not a financial security. It is a zero-sum wealth redistribution </p>
+    <p></p>
+    <!-- <p>All players of Pyramid Game understand that (a) only leaderboard members will receive a portion of Pyramid Game distributions, (b) all distribution amounts are determined by </p> -->
   </section>
 
   <footer style="margin: 4em auto;"><a href="https://steviep.xyz" target="_blank" style="text-decoration: underline;">steviep.xyz</a> 2025</footer>
@@ -853,6 +867,24 @@
   const utf8Clean = raw => raw.replace(/data.*utf8,/, '')
   const b64Clean = raw => raw.replace(/data.*,/, '')
 
+  const handleTx = (txFn, errorId) => async () => {
+    $.id(errorId).innerHTML = 'Pending...'
+    try {
+      const tx = await txFn()
+      $.id(errorId).innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
+      await tx.wait(1)
+      renderPage(addr)
+      $.id(errorId).innerHTML = 'Success!'
+      resetColors()
+      setTimeout(() => {
+        $.id(errorId).innerHTML = ''
+      }, 2000)
+    } catch (e) {
+      $.id(errorId).innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
+      console.error(e)
+    }
+  }
+
   const extractSVG = jsonURI => {
     try {
       const imageDataURI = jsonURI.image
@@ -892,6 +924,108 @@
       const percentage = (l.contribution / contributionTotal) * 100
       return { ...l, share: share, percentage: percentage }
     })
+  }
+
+  const renderLeaderboard = (sortedLeaders, etherscanLink) => {
+    return sortedLeaders.map(l => {
+      const escapedSVG = l.svg.replace(/"/g, '&quot;')
+      return `
+        <div class="leader-card">
+          <h3>${l.tokenName}</h3>
+          <div class="leader-card-content">
+            <leader-svg svg="${escapedSVG}" style="${[5,7,9].includes(l.tokenId) ? 'border: 1px solid' : ''}"></leader-svg>
+            <div class="leader-info">
+              <dl>
+                <dt>OWNER</dt>
+                <dd>
+                  <span class="addr-short">${etherscanAddr(etherscanLink, l.owner, l.prettyAddrShort)}</span>
+                  <span class="addr-full">${etherscanAddr(etherscanLink, l.owner, l.prettyAddr)}</span>
+                </dd>
+              </dl>
+              <div>
+                <dl>
+                  <dt>SENT</dt>
+                  <dd>
+                    <span style="margin-right: 0.25em">Ξ</span><strong>${l.contribution.toFixed(4)}</strong>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>% OF NEXT PAYOUT</dt>
+                  <dd>
+                    <strong>${l.percentage.toFixed(2)}%</strong>
+                  </dd>
+                </dl>
+              </div>
+              <strong style="font-size: 0.75em"><a href="" target="_blank" rel="nofollow">View on OpenSea →</a></strong>
+            </div>
+          </div>
+        </div>
+      `
+    }).join('')
+  }
+
+  const createUpdateSendMessage = ({
+    erc20Balance,
+    userIsLeader,
+    lowestLeader,
+    userTokens,
+    leaderContributionTotal,
+    activeLeaderse,
+    getProjection
+  }) => () => {
+    const amount = parseFloat($.id('sendEthInput').value)
+    if (!amount || amount <= 0) {
+      $.id('sendEthMessage').innerHTML = ''
+      return
+    }
+
+    const newErc20Balance = erc20Balance + amount
+
+    let message = ''
+
+    if (userIsLeader) {
+      const userTotalContribution = userTokens.reduce((sum, t) => sum + t.contribution, 0)
+      const newUserTotal = userTotalContribution + amount
+      const newContributionTotal = leaderContributionTotal + amount
+      const newPercentage = (newUserTotal / newContributionTotal) * 100
+      message = `<p style="text-align: center">You are already on the Leaderboard! This transaction would increase your distribution payouts to <strong>${newPercentage.toFixed(2)}%</strong>.</p>`
+    } else {
+      if (newErc20Balance > lowestLeader.contribution) {
+        const newPercentage = (amount / (leaderContributionTotal + amount)) * 100
+        message = `<p style="text-align: center"><strong>This transaction would give you a Leaderboard slot.</strong></p>
+                  ${erc20Balance ? `<p style="text-align: center">(Your balance of <strong>${erc20Balance.toFixed(4)} $PYRAMID</strong> will burned)</p>` : ''}
+                   <p style="text-align: center">You would receive <strong>${newPercentage.toFixed(2)}%</strong> of future payouts.</p>`
+      } else {
+        message = `<p style="text-align: center">This is not enough to enter the Leaderboard. You would need to send at least <strong><span style="margin-right: 0.25em">Ξ</span>${(lowestLeader.contribution + 0.0001 - erc20Balance).toFixed(4)}</strong>.</p> <p style="text-align: center">However, you would receive <strong>${amount.toFixed(4)} $PYRAMID</strong> from this transaction.</p>`
+      }
+    }
+
+    message = `<div style="margin-top: 1.5em; margin-bottom: 3em">${message}</div>`
+
+    // Add projection table with arrow
+    const projection = getProjection(amount)
+    message += `
+      <div style="margin-top: 1em;">
+        <p style="text-align: center"><strong>Your Ξ${amount} would be split ${activeLeaderse} ways:</strong></p>
+        <div style="margin: 0.5em auto; width: 400px; max-width: 90vw;">
+          ${projection.map((l, index) => `
+            <div style="padding: 0.5em 0; ${index < projection.length - 1 ? 'border-bottom: 1px dashed;' : ''}">
+              <div style="display: flex; align-items: center; gap: 0.25em; margin-bottom: 0.25em;">
+                <span style="display: inline-block; width: ${l.percentage}%; background: var(--font-color); height: 3px; border: 1px solid var(--font-color);"></span>
+                <span style="font-size: 0.6em;">${l.percentage.toFixed(1)}%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.25em;">
+                <span><span style="margin-right: 0.25em">Ξ</span><strong>${l.share.toFixed(4)}</strong></span>
+                <span style="font-size: 1.5em; padding: 0 1em">→</span>
+                <span>${l.prettyAddrShort}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+
+    $.id('sendEthMessage').innerHTML = message
   }
 
   // Main render function
@@ -945,44 +1079,11 @@
     `
 
     // Render leaderboard grid
-    $.id('leaderboard-board').innerHTML = sortedLeaders.map(l => {
-      const escapedSVG = l.svg.replace(/"/g, '&quot;')
-      return `
-        <div class="leader-card">
-          <h3>${l.tokenName}</h3>
-          <div class="leader-card-content">
-            <leader-svg svg="${escapedSVG}" style="${[5,7,9].includes(l.tokenId) ? 'border: 1px solid' : ''}"></leader-svg>
-            <div class="leader-info">
-              <dl>
-                <dt>OWNER</dt>
-                <dd>
-                  <span class="addr-short">${etherscanAddr(etherscanLink, l.owner, l.prettyAddrShort)}</span>
-                  <span class="addr-full">${etherscanAddr(etherscanLink, l.owner, l.prettyAddr)}</span>
-                </dd>
-              </dl>
-              <div>
-                <dl>
-                  <dt>SENT</dt>
-                  <dd>
-                    <span style="margin-right: 0.25em">Ξ</span><strong>${l.contribution.toFixed(4)}</strong>
-                  </dd>
-                </dl>
-                <dl>
-                  <dt>% OF NEXT PAYOUT</dt>
-                  <dd>
-                    <strong>${l.percentage.toFixed(2)}%</strong>
-                  </dd>
-                </dl>
-              </div>
-              <strong style="font-size: 0.75em"><a href="" target="_blank" rel="nofollow">View on OpenSea →</a></strong>
-            </div>
-          </div>
-        </div>
-      `
-    }).join('')
+    $.id('leaderboard-board').innerHTML = renderLeaderboard(sortedLeaders, etherscanLink)
 
     // Get user's tokens
     const userTokens = leaders.filter(l => l.owner.toLowerCase() === addr.toLowerCase())
+    const leaderSlotIds = userTokens.map(l => l.tokenId)
 
     // Get user's ERC20 balance
     const erc20Balance = ethVal(await PyramidGame.balanceOf(addr))
@@ -995,8 +1096,12 @@
     $.id('sendEthSection').innerHTML = `
       <div style="text-align: center; margin-bottom: 1em;">
         <h3><strong>Connected as:</strong> ${prettyAddr}</h3>
-        ${!userIsLeader ? `<p>Lowest Leaderboard contribution: <strong><span style="margin-right: 0.25em">Ξ</span>${lowestLeader.contribution.toFixed(4)}</strong></p>` : ''}
-        ${erc20Balance > 0 ? `<p>Your $PYRAMID Balance: <strong>${erc20Balance.toFixed(4)}</strong></p>` : ''}
+
+        <div class="invert">
+          ${!userIsLeader ? `<p>Lowest Leaderboard contribution: <strong><span style="margin-right: 0.25em">Ξ</span>${lowestLeader.contribution.toFixed(4)}</strong></p>` : ''}
+          ${userIsLeader ? `<p>Your Leaderboard Slot${userTokens.length > 1 ? 's' : ''}: <strong>${userTokens.map(l => l.tokenId + ` (${l.percentage.toFixed(2)}%)`).join(', ')}</strong></p>` : ''}
+          ${erc20Balance > 0 ? `<p>Your $PYRAMID Balance: <strong>${erc20Balance.toFixed(4)}</strong></p>` : ''}
+        </div>
       </div>
       <div class="center">
         <input id="sendEthInput" placeholder="0.01 Ξ" type="number" step="0.01" style="width:10.1em">
@@ -1006,87 +1111,25 @@
       <div id="sendEthError" class="error-message"></div>
     `
 
-    const updateSendMessage = () => {
-      const amount = parseFloat($.id('sendEthInput').value)
-      if (!amount || amount <= 0) {
-        $.id('sendEthMessage').innerHTML = ''
-        return
-      }
 
-      const newErc20Balance = erc20Balance + amount
+    $.id('sendEthInput').oninput = createUpdateSendMessage({
+      erc20Balance,
+      userIsLeader,
+      lowestLeader,
+      userTokens,
+      leaderContributionTotal,
+      activeLeaderse,
+      getProjection
+    })
 
-      let message = ''
-
-      if (userIsLeader) {
-        const userTotalContribution = userTokens.reduce((sum, t) => sum + t.contribution, 0)
-        const newUserTotal = userTotalContribution + amount
-        const newContributionTotal = leaderContributionTotal + amount
-        const newPercentage = (newUserTotal / newContributionTotal) * 100
-        message = `<p style="text-align: center">This transaction would increase your distribution payout to <strong>${newPercentage.toFixed(2)}%</strong>.</p>`
-      } else {
-        if (newErc20Balance > lowestLeader.contribution) {
-          const newPercentage = (amount / (leaderContributionTotal + amount)) * 100
-          message = `<p style="text-align: center"><strong>This transaction would give you a Leaderboard slot.</strong></p>
-                    ${erc20Balance ? `<p style="text-align: center">(Your balance of <strong>${erc20Balance.toFixed(4)} $PYRAMID</strong> will burned)</p>` : ''}
-                     <p style="text-align: center">You would receive <strong>${newPercentage.toFixed(2)}%</strong> of future payouts.</p>`
-        } else {
-          message = `<p style="text-align: center">This is not enough to enter the Leaderboard. You would need to send at least <strong><span style="margin-right: 0.25em">Ξ</span>${(lowestLeader.contribution + 0.0001 - erc20Balance).toFixed(4)}</strong>.</p> <p style="text-align: center">However, you would receive <strong>${amount.toFixed(4)} $PYRAMID</strong> from this transaction.</p>`
-        }
-      }
-
-      message = `<div style="margin-top: 1.5em; margin-bottom: 3em">${message}</div>`
-
-      // Add projection table with arrow
-      const projection = getProjection(amount)
-      message += `
-        <div style="margin-top: 1em;">
-          <p style="text-align: center"><strong>Your Ξ${amount} would be split ${activeLeaderse} ways:</strong></p>
-          <div style="margin: 0.5em auto; width: 400px; max-width: 90vw;">
-            ${projection.map((l, index) => `
-              <div style="padding: 0.5em 0; ${index < projection.length - 1 ? 'border-bottom: 1px dashed;' : ''}">
-                <div style="display: flex; align-items: center; gap: 0.25em; margin-bottom: 0.25em;">
-                  <span style="display: inline-block; width: ${l.percentage}%; background: var(--font-color); height: 3px; border: 1px solid var(--font-color);"></span>
-                  <span style="font-size: 0.6em;">${l.percentage.toFixed(1)}%</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.25em;">
-                  <span><span style="margin-right: 0.25em">Ξ</span><strong>${l.share.toFixed(4)}</strong></span>
-                  <span style="font-size: 1.5em; padding: 0 1em">→</span>
-                  <span>${l.prettyAddrShort}</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `
-
-      $.id('sendEthMessage').innerHTML = message
-    }
-
-    $.id('sendEthInput').oninput = updateSendMessage
-
-    $.id('sendEthBtn').onclick = async () => {
+    $.id('sendEthBtn').onclick = handleTx(async () => {
       $.id('sendEthMessage').innerHTML = ''
       const amount = parseFloat($.id('sendEthInput').value)
       if (!amount || amount <= 0) {
-        $.id('sendEthError').innerHTML = 'Please enter a valid amount'
-        return
+        throw new Error('Invalid amount')
       }
-
-      $.id('sendEthError').innerHTML = 'Pending...'
-      try {
-        const tx = await PyramidGame.contribute(txValue(amount))
-        $.id('sendEthError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
-        await tx.wait(1)
-        renderPage(addr)
-        $.id('sendEthError').innerHTML = 'Success!'
-        setTimeout(() => {
-          $.id('sendEthError').innerHTML = ''
-        }, 2000)
-      } catch (e) {
-        $.id('sendEthError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
-        console.error(e)
-      }
-    }
+      return await PyramidGame.contribute(txValue(amount))
+    }, 'sendEthError')
 
     // === 4. Connected User Info ===
     $.id('connectedUserInfo').innerHTML = `
@@ -1183,11 +1226,11 @@
 
     // Check if PG has ETH balance
     const pgBalance = ethVal(await provider.provider.getBalance(PyramidGame.address))
-    if (pgBalance > 0) {
+    if (pgBalance > 1e-8) {
       userSectionHTML += `
         <div class="section-box">
           <h2>Force Distribution</h2>
-          <p>Pyramid Game contract balance: <span style="margin-right: 0.25em">Ξ</span>${pgBalance.toFixed(4)}</p>
+          <p>Pyramid Game contract balance: <span style="margin-right: 0.25em">Ξ</span>${pgBalance}</p>
           <button id="forceDistributeBtn" class="tiny-button">Force Distribution</button>
           <div id="forceDistributeError" class="error-message"></div>
         </div>
@@ -1198,108 +1241,42 @@
 
     // Wire up event handlers
     if (userIsLeader && erc20Balance > 0) {
-      $.id('addContribBtn').onclick = async () => {
-        $.id('addContribError').innerHTML = 'Pending...'
-        try {
-          const tokenId = Number($.id('addContribTokenId').value)
-          const amount = parseFloat($.id('addContribAmount').value)
-          const tokenAmount = Math.floor(amount)
-
-          const tx = await PyramidGame.addToLeaderContributionBalance(tokenId, tokenAmount)
-          $.id('addContribError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
-          await tx.wait(1)
-          renderPage(addr)
-          $.id('addContribError').innerHTML = 'Success!'
-          setTimeout(() => {
-            $.id('addContribError').innerHTML = ''
-          }, 2000)
-        } catch (e) {
-          $.id('addContribError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
-          console.error(e)
-        }
-      }
+      $.id('addContribBtn').onclick = handleTx(async () => {
+        const tokenId = Number($.id('addContribTokenId').value)
+        const amount = parseFloat($.id('addContribAmount').value)
+        const tokenAmount = Math.floor(amount)
+        return await PyramidGame.addToLeaderContributionBalance(tokenId, tokenAmount)
+      }, 'addContribError')
     }
 
     if (erc20Balance > 0) {
       const canClaimLeadership = erc20Balance > lowestLeader.contribution
 
       if (canClaimLeadership) {
-        $.id('claimLeadershipBtn').onclick = async () => {
-          $.id('claimError').innerHTML = 'Pending...'
-          try {
-            const tx = await PyramidGame.claimLeadership()
-            $.id('claimError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
-            await tx.wait(1)
-            renderPage(addr)
-            $.id('claimError').innerHTML = 'Success!'
-            setTimeout(() => {
-              $.id('claimError').innerHTML = ''
-            }, 2000)
-          } catch (e) {
-            $.id('claimError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
-            console.error(e)
-          }
-        }
+        $.id('claimLeadershipBtn').onclick = handleTx(async () => {
+          return await PyramidGame.claimLeadership()
+        }, 'claimError')
       }
 
-      $.id('transferBtn').onclick = async () => {
-        $.id('transferError').innerHTML = 'Pending...'
-        try {
-          const to = $.id('transferTo').value
-          const amount = parseFloat($.id('transferAmount').value)
-          const tokenAmount = Math.floor(amount)
+      $.id('transferBtn').onclick = handleTx(async () => {
+        const to = $.id('transferTo').value
+        const amount = parseFloat($.id('transferAmount').value)
+        const tokenAmount = Math.floor(amount)
+        return await PyramidGame.transfer(to, tokenAmount)
+      }, 'transferError')
 
-          const tx = await PyramidGame.transfer(to, tokenAmount)
-          $.id('transferError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
-          await tx.wait(1)
-          renderPage(addr)
-          $.id('transferError').innerHTML = 'Success!'
-          setTimeout(() => {
-            $.id('transferError').innerHTML = ''
-          }, 2000)
-        } catch (e) {
-          $.id('transferError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
-          console.error(e)
-        }
-      }
-
-      $.id('approveBtn').onclick = async () => {
-        $.id('approveError').innerHTML = 'Pending...'
-        try {
-          const spender = $.id('approveSpender').value
-          const amount = parseFloat($.id('approveAmount').value)
-          const tokenAmount = Math.floor(amount)
-
-          const tx = await PyramidGame.approve(spender, tokenAmount)
-          $.id('approveError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
-        $.id('approveError').innerHTML = 'Success!'
-          await tx.wait(1)
-          $.id('approveError').innerHTML = ''
-          setTimeout(() => $.id('approveError').innerHTML = '', 4000)
-        } catch (e) {
-          $.id('approveError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
-          console.error(e)
-        }
-      }
+      $.id('approveBtn').onclick = handleTx(async () => {
+        const spender = $.id('approveSpender').value
+        const amount = parseFloat($.id('approveAmount').value)
+        const tokenAmount = Math.floor(amount)
+        return await PyramidGame.approve(spender, tokenAmount)
+      }, 'approveError')
     }
 
     if (pgBalance > 0) {
-      $.id('forceDistributeBtn').onclick = async () => {
-        $.id('forceDistributeError').innerHTML = 'Pending...'
-        try {
-          const tx = await PyramidGame.forceDistribution()
-          $.id('forceDistributeError').innerHTML = `<span class="blinkSlow">TX Pending.</span> <a href="https://${etherscanLink}/tx/${tx.hash}" target="_blank" rel="nofollow">View on etherscan</a>`
-          await tx.wait(1)
-          renderPage(addr)
-          $.id('forceDistributeError').innerHTML = 'Success!'
-          setTimeout(() => {
-            $.id('forceDistributeError').innerHTML = ''
-          }, 2000)
-        } catch (e) {
-          $.id('forceDistributeError').innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
-          console.error(e)
-        }
-      }
+      $.id('forceDistributeBtn').onclick = handleTx(async () => {
+        return await PyramidGame.forceDistribution()
+      }, 'forceDistributeError')
     }
 
 
@@ -1345,17 +1322,34 @@ export const setColor = (c, v) => {
   r.style.setProperty(c, v)
 }
 
-const colors = [
- 'var(--green-color)',
- 'var(--black-color)',
- 'var(--blue-color)',
- 'var(--red-color)',
-]//.sort(() => Math.random() - 0.5)
+function resetColors() {
+  const colors = [
+   'var(--green-color)',
+   'var(--black-color)',
+   'var(--blue-color)',
+   'var(--red-color)',
+  ].sort(() => Math.random() - 0.5)
 
 
-setColor('--bg-color', colors[0])
-setColor('--font-color', colors[1])
-setColor('--accent-color', colors[2])
+
+
+  setColor('--bg-color', colors[0])
+  setColor('--font-color', colors[1])
+  setColor('--accent-color', colors[2])
+
+  if (colors[1] === 'var(--red-color)') {
+    setColor('--gray-color', '#0e413c')
+  } else if (colors[1] === 'var(--blue-color)') {
+    setColor('--gray-color', '#8aa5a2')
+  } else if (colors[1] === 'var(--green-color)') {
+    setColor('--gray-color', '#5c7471')
+  }
+
+
+}
+
+resetColors()
+
 
 
 // pink/orange

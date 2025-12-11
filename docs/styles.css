@@ -36,9 +36,10 @@
   --black-color: #000;
 
 
-  --accent-color: var(--magenta-color);
+  --accent-color: var(--blue-color);
   --font-color:  var(--black-color);
   --bg-color: var(--green-color);
+  --dark-border-color: var(--black-color);
 
   --tertiary-color: #000;
   --input-color: color-mix(in srgb, var(--bg-color) 16%, #fff);
