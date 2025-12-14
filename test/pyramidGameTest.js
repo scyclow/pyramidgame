@@ -53,7 +53,7 @@ const contractBalance = contract => contract.provider.getBalance(contract.addres
 
 
 
-let PyramidGame, PyramidGameLeaders, signers, txs, PG, PGL
+let PyramidGame, PyramidGameLeaderboard, signers, txs, PG, PGL
 
 describe('PyramidGame', () => {
   beforeEach(async () => {
@@ -66,19 +66,19 @@ describe('PyramidGame', () => {
 
 
     const PyramidGameFactory = await ethers.getContractFactory('PyramidGame', signers[0])
-    const PyramidGameLeadersFactory = await ethers.getContractFactory('PyramidGameLeaders', signers[0])
+    const PyramidGameLeaderboardFactory = await ethers.getContractFactory('PyramidGameLeaderboard', signers[0])
 
     const initialAmount = ethers.utils.parseEther('0.01')
 
     PyramidGame = await PyramidGameFactory.deploy({ value: initialAmount })
     await PyramidGame.deployed()
-    PyramidGameLeaders = await PyramidGameLeadersFactory.attach(
-      await PyramidGame.leaders()
+    PyramidGameLeaderboard = await PyramidGameLeaderboardFactory.attach(
+      await PyramidGame.leaderboard()
     )
 
 
     PG = (s) => PyramidGame.connect(s)
-    PGL = (s) => PyramidGameLeaders.connect(s)
+    PGL = (s) => PyramidGameLeaderboard.connect(s)
   })
 
 
@@ -87,8 +87,8 @@ describe('PyramidGame', () => {
     it('has correct name and symbol', async () => {
       expect(await PyramidGame.name()).to.equal('Pyramid Game')
       expect(await PyramidGame.symbol()).to.equal('PYRAMID')
-      expect(await PyramidGameLeaders.name()).to.equal('Pyramid Game Leaderboard')
-      expect(await PyramidGameLeaders.symbol()).to.equal('LEADER')
+      expect(await PyramidGameLeaderboard.name()).to.equal('Pyramid Game Leaderboard')
+      expect(await PyramidGameLeaderboard.symbol()).to.equal('LEADER')
     })
 
     it('makes the right payments', async () => {
@@ -388,7 +388,7 @@ describe('PyramidGame', () => {
 
     it('sending directly to contracts should work', async () => {
       await send(signers[0], PyramidGame, 1)
-      await send(signers[0], PyramidGameLeaders, 1)
+      await send(signers[0], PyramidGameLeaderboard, 1)
     })
 
     it('token uri should work', async () => {
@@ -500,7 +500,7 @@ describe('PyramidGame', () => {
       await newURI.deployed()
 
       // Get the current URI to verify it changes
-      const oldURI = await PyramidGameLeaders.uri()
+      const oldURI = await PyramidGameLeaderboard.uri()
       expect(oldURI).to.not.equal(newURI.address)
 
       // Test 1: Single leader cannot update URI directly
@@ -512,9 +512,9 @@ describe('PyramidGame', () => {
       const wallet = await PyramidGame.wallet()
 
       // Prepare the transaction data
-      const target = PyramidGameLeaders.address
+      const target = PyramidGameLeaderboard.address
       const value = 0
-      const data = PyramidGameLeaders.interface.encodeFunctionData('updateURI', [newURI.address])
+      const data = PyramidGameLeaderboard.interface.encodeFunctionData('updateURI', [newURI.address])
       const txNonce = 1
 
       // Create message hash (same as in the contract using abi.encode)
@@ -531,7 +531,7 @@ describe('PyramidGame', () => {
 
       for (let i = 0; i < leaderTokenIds.length; i++) {
         const tokenId = leaderTokenIds[i]
-        const owner = await PyramidGameLeaders.ownerOf(tokenId)
+        const owner = await PyramidGameLeaderboard.ownerOf(tokenId)
         const signer = signers.find(s => s.address === owner)
 
         // signMessage automatically adds the Ethereum prefix
@@ -551,7 +551,7 @@ describe('PyramidGame', () => {
       )
 
       // Verify the URI was updated
-      const updatedURI = await PyramidGameLeaders.uri()
+      const updatedURI = await PyramidGameLeaderboard.uri()
       expect(updatedURI).to.equal(newURI.address)
     })
 
@@ -577,9 +577,9 @@ describe('PyramidGame', () => {
       const wallet = await PyramidGame.wallet()
 
       // Prepare the transaction data
-      const target = PyramidGameLeaders.address
+      const target = PyramidGameLeaderboard.address
       const value = 0
-      const data = PyramidGameLeaders.interface.encodeFunctionData('updateURI', [newURI.address])
+      const data = PyramidGameLeaderboard.interface.encodeFunctionData('updateURI', [newURI.address])
       const txNonce = 2
 
       // Create message hash
@@ -596,7 +596,7 @@ describe('PyramidGame', () => {
 
       for (let i = 0; i < leaderTokenIds.length; i++) {
         const tokenId = leaderTokenIds[i]
-        const owner = await PyramidGameLeaders.ownerOf(tokenId)
+        const owner = await PyramidGameLeaderboard.ownerOf(tokenId)
         const signer = signers.find(s => s.address === owner)
 
         const signature = await signer.signMessage(ethers.utils.arrayify(messageHash))
@@ -643,7 +643,7 @@ describe('PyramidGame', () => {
       const PyramidGameWalletFactory = await ethers.getContractFactory('PyramidGameWallet', signers[0])
       const newWallet = await PyramidGameWalletFactory.deploy(
         PyramidGame.address,
-        PyramidGameLeaders.address,
+        PyramidGameLeaderboard.address,
         signers[0].address // parent - just use signers[0] for testing
       )
       await newWallet.deployed()
@@ -668,7 +668,7 @@ describe('PyramidGame', () => {
 
       for (let i = 0; i < leaderTokenIds.length; i++) {
         const tokenId = leaderTokenIds[i]
-        const owner = await PyramidGameLeaders.ownerOf(tokenId)
+        const owner = await PyramidGameLeaderboard.ownerOf(tokenId)
         const signer = signers.find(s => s.address === owner)
 
         const signature = await signer.signMessage(ethers.utils.arrayify(messageHash))
@@ -696,12 +696,12 @@ describe('PyramidGame', () => {
       const newURI = await TokenURIFactory.deploy()
       await newURI.deployed()
 
-      const oldURI = await PyramidGameLeaders.uri()
+      const oldURI = await PyramidGameLeaderboard.uri()
 
       // Prepare transaction to update URI using the new wallet
-      const uriTarget = PyramidGameLeaders.address
+      const uriTarget = PyramidGameLeaderboard.address
       const uriValue = 0
-      const uriData = PyramidGameLeaders.interface.encodeFunctionData('updateURI', [newURI.address])
+      const uriData = PyramidGameLeaderboard.interface.encodeFunctionData('updateURI', [newURI.address])
       const uriTxNonce = 1 // New wallet has its own nonce counter
 
       // Create message hash for URI update
@@ -716,7 +716,7 @@ describe('PyramidGame', () => {
       const uriSignatures = []
       for (let i = 0; i < leaderTokenIds.length; i++) {
         const tokenId = leaderTokenIds[i]
-        const owner = await PyramidGameLeaders.ownerOf(tokenId)
+        const owner = await PyramidGameLeaderboard.ownerOf(tokenId)
         const signer = signers.find(s => s.address === owner)
 
         const signature = await signer.signMessage(ethers.utils.arrayify(uriMessageHash))
@@ -734,7 +734,7 @@ describe('PyramidGame', () => {
       )
 
       // Verify URI was updated by the new wallet
-      const finalURI = await PyramidGameLeaders.uri()
+      const finalURI = await PyramidGameLeaderboard.uri()
       expect(finalURI).to.equal(newURI.address)
       expect(finalURI).to.not.equal(oldURI)
     })
@@ -746,7 +746,7 @@ describe('PyramidGame', () => {
       await PG(signers[3]).contribute(txValue(0.3))
 
       // Verify we have 4 leaders
-      const totalSupply = await PyramidGameLeaders.totalSupply()
+      const totalSupply = await PyramidGameLeaderboard.totalSupply()
       expect(totalSupply).to.equal(4)
 
       // Deploy a new TokenURI contract to test with
@@ -757,9 +757,9 @@ describe('PyramidGame', () => {
       const wallet = await PyramidGame.wallet()
 
       // Prepare the transaction data
-      const target = PyramidGameLeaders.address
+      const target = PyramidGameLeaderboard.address
       const value = 0
-      const data = PyramidGameLeaders.interface.encodeFunctionData('updateURI', [newURI.address])
+      const data = PyramidGameLeaderboard.interface.encodeFunctionData('updateURI', [newURI.address])
       const txNonce = 4
 
       // Create message hash
@@ -776,7 +776,7 @@ describe('PyramidGame', () => {
 
       for (let i = 0; i < leaderTokenIds.length; i++) {
         const tokenId = leaderTokenIds[i]
-        const owner = await PyramidGameLeaders.ownerOf(tokenId)
+        const owner = await PyramidGameLeaderboard.ownerOf(tokenId)
         const signer = signers.find(s => s.address === owner)
 
         const signature = await signer.signMessage(ethers.utils.arrayify(messageHash))
@@ -795,7 +795,7 @@ describe('PyramidGame', () => {
       )
 
       // Verify the URI was updated
-      const updatedURI = await PyramidGameLeaders.uri()
+      const updatedURI = await PyramidGameLeaderboard.uri()
       expect(updatedURI).to.equal(newURI.address)
     })
   })

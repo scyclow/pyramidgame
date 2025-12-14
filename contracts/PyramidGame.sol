@@ -47,7 +47,7 @@ contract PyramidGame is ERC20 {
   uint8 constant public INVALID_SLOT = SLOTS + 1;
 
   /// @notice The Leaders contract managing the leader NFTs and contribution balances
-  PyramidGameLeaders public leaders;
+  PyramidGameLeaderboard public leaderboard;
 
   /// @notice The Wallet contract controlled by majority of leaders for governance actions
   PyramidGameWallet public wallet;
@@ -86,7 +86,7 @@ contract PyramidGame is ERC20 {
 
   /// @notice Initialize the Pyramid Game instance
   /// @dev Can only be called once. Called by constructor for normal deployments, or manually for proxy clones.
-  ///      Creates the Leaders NFT contract and Wallet governance contract.
+  ///      Creates the Leaderboard NFT contract and Wallet governance contract.
   ///      The wallet receives msg.value and transfers it to the parent (deployer for root, parent pyramid for children).
   /// @param deployer The address that will receive the first leader NFT (token ID 0)
   /// @param gameName The name of the game/ERC20 token (e.g., "Pyramid Game"). Empty string uses default from constructor.
@@ -110,8 +110,10 @@ contract PyramidGame is ERC20 {
       : "Pyramid Game Leaderboard";
     string memory nftSymbol = bytes(leaderSymbol).length > 0 ? leaderSymbol : "LEADER";
 
-    leaders = new PyramidGameLeaders(deployer, SLOTS, msg.value, nftName, nftSymbol);
-    wallet = new PyramidGameWallet{value: msg.value}(address(this), address(leaders), payable(msg.sender));
+    leaderboard = new PyramidGameLeaderboard(deployer, SLOTS, msg.value, nftName, nftSymbol);
+    wallet = new PyramidGameWallet{value: msg.value}(address(this), address(leaderboard), payable(msg.sender));
+
+    emit Contribution(msg.sender, msg.value);
   }
 
 
@@ -143,7 +145,7 @@ contract PyramidGame is ERC20 {
   /// @notice Allows existing leaders to burn $PYRAMID and increment their LEADER token's contribution balance
   function addToLeaderContributionBalance(uint256 tokenId, uint256 tokenAmount) external {
     _burn(msg.sender, tokenAmount);
-    leaders.incrementContributionBalance(tokenId, tokenAmount);
+    leaderboard.incrementContributionBalance(tokenId, tokenAmount);
   }
 
 
@@ -174,7 +176,7 @@ contract PyramidGame is ERC20 {
     uint8 senderIsLeaderTokenId = _distribute(msg.value);
 
     if (senderIsLeaderTokenId != INVALID_SLOT) {
-      leaders.incrementContributionBalance(uint256(senderIsLeaderTokenId), msg.value);
+      leaderboard.incrementContributionBalance(uint256(senderIsLeaderTokenId), msg.value);
     } else {
       _reorg(msg.sender, msg.value);
     }
@@ -189,7 +191,7 @@ contract PyramidGame is ERC20 {
     uint8 senderIsLeaderTokenId = INVALID_SLOT;
 
     // Single batch read of all leader data and contribution total
-    (PyramidGameLeaders.LeaderData[] memory leaderCache, uint256 contributionTotal) = leaders.getAllLeaderData();
+    (PyramidGameLeaderboard.LeaderData[] memory leaderCache, uint256 contributionTotal) = leaderboard.getAllLeaderData();
 
     // Distribute using cached data (no external calls in loop)
     uint256 leaderCount = leaderCache.length;
@@ -215,10 +217,10 @@ contract PyramidGame is ERC20 {
 
   /// @dev After the distribution has been made, recalculate the leaderboard.
   function _reorg(address contributor, uint256 contributionAmount) internal {
-    if (leaders.totalSupply() < SLOTS) {
-      leaders.mint(contributor, contributionAmount);
+    if (leaderboard.totalSupply() < SLOTS) {
+      leaderboard.mint(contributor, contributionAmount);
     } else {
-      (uint256 tokenId, uint256 leaderAmount) = leaders.lowestLeader();
+      (uint256 tokenId, uint256 leaderAmount) = leaderboard.lowestLeader();
       uint256 senderContributions = outstandingContributions(contributor) + contributionAmount;
       if (senderContributions > leaderAmount) {
         _replaceLowestLeader(tokenId, contributor, leaderAmount, senderContributions);
@@ -230,8 +232,8 @@ contract PyramidGame is ERC20 {
 
   /// @dev Find the leader with the lowest total contribution amount and replace them with the sender.
   function _replaceLowestLeader(uint256 tokenId, address contributor, uint256 leaderAmount, uint256 senderContributions) internal {
-    _mint(leaders.ownerOf(tokenId), leaderAmount);
-    leaders.reorg(tokenId, contributor, senderContributions - leaderAmount);
+    _mint(leaderboard.ownerOf(tokenId), leaderAmount);
+    leaderboard.reorg(tokenId, contributor, senderContributions - leaderAmount);
     _burn(contributor, balanceOf(contributor));
   }
 
@@ -341,8 +343,8 @@ contract PyramidGameWallet {
   /// @notice Reference to the PyramidGame contract
   PyramidGame public pyramidGame;
 
-  /// @notice Reference to the PyramidGameLeaders contract for verifying leader ownership
-  PyramidGameLeaders public leaders;
+  /// @notice Reference to the PyramidGameLeaderboard contract for verifying leader ownership
+  PyramidGameLeaderboard public leaderboard;
 
   /// @notice Mapping to prevent replay attacks - tracks which nonces have been used
   mapping(uint256 => bool) public nonceUsed;
@@ -350,11 +352,11 @@ contract PyramidGameWallet {
   /// @notice Initialize the wallet contract
   /// @dev Transfers any received ETH to the parent address (deployer for root, parent pyramid for children)
   /// @param pgAddr Address of the PyramidGame contract
-  /// @param leaderAddr Address of the PyramidGameLeaders contract
+  /// @param leaderAddr Address of the PyramidGameLeaderboard contract
   /// @param parentAddr Address to send initialization ETH to (parent pyramid or deployer)
   constructor(address pgAddr, address leaderAddr, address payable parentAddr) payable {
     pyramidGame = PyramidGame(payable(pgAddr));
-    leaders = PyramidGameLeaders(payable(leaderAddr));
+    leaderboard = PyramidGameLeaderboard(payable(leaderAddr));
 
     // Transfer ETH to parent
     if (msg.value > 0) {
@@ -381,7 +383,7 @@ contract PyramidGameWallet {
   ) external {
     require(!nonceUsed[txNonce], 'Nonce already used');
     require(leaderTokenIds.length == signatures.length, 'Array length mismatch');
-    require(leaderTokenIds.length > leaders.totalSupply() / 2, 'Insufficient votes');
+    require(leaderTokenIds.length > leaderboard.totalSupply() / 2, 'Insufficient votes');
 
     bytes32 messageHash = keccak256(abi.encode(target, value, data, txNonce));
     bytes32 ethSignedMessageHash = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', messageHash));
@@ -390,7 +392,7 @@ contract PyramidGameWallet {
     for (uint256 i = 0; i < leaderTokenIds.length; i++) {
       address signer = recoverSigner(ethSignedMessageHash, signatures[i]);
       require(
-        leaders.isApprovedOrOwner(signer, leaderTokenIds[i]),
+        leaderboard.isApprovedOrOwner(signer, leaderTokenIds[i]),
         'Invalid signature'
       );
     }
@@ -443,7 +445,7 @@ contract PyramidGameWallet {
 /// @title Pyramid Game
 /// @author steviep.eth
 /// @notice NFT contract that manages the Leader Board for Pyramid Game.
-contract PyramidGameLeaders is ERC721 {
+contract PyramidGameLeaderboard is ERC721 {
   struct LeaderData {
     address owner;
     uint96 contribution;
@@ -606,9 +608,9 @@ contract PyramidGameLeaders is ERC721 {
 }
 
 contract TokenURI {
-  PyramidGameLeaders public leaders;
+  PyramidGameLeaderboard public leaderboard;
   constructor() {
-    leaders = PyramidGameLeaders(payable(msg.sender));
+    leaderboard = PyramidGameLeaderboard(payable(msg.sender));
   }
 
   function tokenURI(uint256 tokenId) public view returns (string memory) {
@@ -621,11 +623,11 @@ contract TokenURI {
 
     return string(abi.encodePacked(
       'data:application/json;utf8,'
-      '{"name": "', leaders.name(),' Slot #', tokenString,
+      '{"name": "', leaderboard.name(),' Slot #', tokenString,
       '", "description": "All ETH sent to Pyramid Game is split proportionally among the 12 Leaderboard slots based on their prior contributions.",'
       '"license": "CC0",'
       '"image": "', encodedSVG,
-      '", "attributes": [{ "trait_type": "Leader Token Contributions", "value": "', Strings.toString(leaders.contributions(tokenId)), ' wei" }]'
+      '", "attributes": [{ "trait_type": "Leader Token Contributions", "value": "', Strings.toString(leaderboard.contributions(tokenId)), ' wei" }]'
       '}'
     ));
   }

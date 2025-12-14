@@ -5,25 +5,25 @@ const toETH = amt => ethers.utils.parseEther(String(amt))
 const txValue = amt => ({ value: toETH(amt) })
 const ethVal = n => Number(ethers.utils.formatEther(n))
 
-let PyramidGame, PyramidGameLeaders, signers, PG, PGL
+let PyramidGame, PyramidGameLeaderboard, signers, PG, PGL
 
 describe('PyramidGame Child Deployment', () => {
   beforeEach(async () => {
     signers = await ethers.getSigners()
 
     const PyramidGameFactory = await ethers.getContractFactory('PyramidGame', signers[0])
-    const PyramidGameLeadersFactory = await ethers.getContractFactory('PyramidGameLeaders', signers[0])
+    const PyramidGameLeaderboardFactory = await ethers.getContractFactory('PyramidGameLeaderboard', signers[0])
 
     const initialAmount = ethers.utils.parseEther('0.01')
 
     PyramidGame = await PyramidGameFactory.deploy({ value: initialAmount })
     await PyramidGame.deployed()
-    PyramidGameLeaders = await PyramidGameLeadersFactory.attach(
-      await PyramidGame.leaders()
+    PyramidGameLeaderboard = await PyramidGameLeaderboardFactory.attach(
+      await PyramidGame.leaderboard()
     )
 
     PG = (s) => PyramidGame.connect(s)
-    PGL = (s) => PyramidGameLeaders.connect(s)
+    PGL = (s) => PyramidGameLeaderboard.connect(s)
   })
 
   describe('deployChildPyramidGame', () => {
@@ -53,9 +53,9 @@ describe('PyramidGame Child Deployment', () => {
       expect(await childPyramid.symbol()).to.equal('CHILD')
 
       // Verify child leaders has custom name and symbol
-      const childLeadersAddress = await childPyramid.leaders()
-      const PyramidGameLeadersFactory = await ethers.getContractFactory('PyramidGameLeaders')
-      const childLeaders = PyramidGameLeadersFactory.attach(childLeadersAddress)
+      const childLeadersAddress = await childPyramid.leaderboard()
+      const PyramidGameLeaderboardFactory = await ethers.getContractFactory('PyramidGameLeaderboard')
+      const childLeaders = PyramidGameLeaderboardFactory.attach(childLeadersAddress)
       expect(await childLeaders.name()).to.equal('Child Game Leaderboard')
       expect(await childLeaders.symbol()).to.equal('CHILDL')
     })
@@ -100,9 +100,9 @@ describe('PyramidGame Child Deployment', () => {
       const childWalletAddress = await childPyramid.wallet()
 
       // Check that child's wallet has tokens/NFT in the parent (this PyramidGame)
-      const parentLeadersAddress = await PyramidGame.leaders()
-      const PyramidGameLeadersFactory = await ethers.getContractFactory('PyramidGameLeaders')
-      const parentLeaders = PyramidGameLeadersFactory.attach(parentLeadersAddress)
+      const parentLeadersAddress = await PyramidGame.leaderboard()
+      const PyramidGameLeaderboardFactory = await ethers.getContractFactory('PyramidGameLeaderboard')
+      const parentLeaders = PyramidGameLeaderboardFactory.attach(parentLeadersAddress)
 
       // Child wallet should own a leader token in parent (since 1 ETH > 0.01 ETH initial)
       const balance = await parentLeaders.balanceOf(childWalletAddress)
@@ -116,9 +116,9 @@ describe('PyramidGame Child Deployment', () => {
         await PG(signers[i]).contribute(txValue(1))
       }
 
-      const parentLeadersAddr = await PyramidGame.leaders()
-      const PyramidGameLeadersFactory = await ethers.getContractFactory('PyramidGameLeaders')
-      const parentLeaders = PyramidGameLeadersFactory.attach(parentLeadersAddr)
+      const parentLeadersAddr = await PyramidGame.leaderboard()
+      const PyramidGameLeaderboardFactory = await ethers.getContractFactory('PyramidGameLeaderboard')
+      const parentLeaders = PyramidGameLeaderboardFactory.attach(parentLeadersAddr)
 
       // Verify 12 leaders
       expect(await parentLeaders.totalSupply()).to.equal(12)
@@ -136,8 +136,8 @@ describe('PyramidGame Child Deployment', () => {
       const PyramidGameFactory = await ethers.getContractFactory('PyramidGame')
       const childPyramid = PyramidGameFactory.attach(childAddress)
       const childWalletAddr = await childPyramid.wallet()
-      const childLeadersAddr = await childPyramid.leaders()
-      const childLeaders = PyramidGameLeadersFactory.attach(childLeadersAddr)
+      const childLeadersAddr = await childPyramid.leaderboard()
+      const childLeaders = PyramidGameLeaderboardFactory.attach(childLeadersAddr)
 
       const PyramidGameWalletFactory = await ethers.getContractFactory('PyramidGameWallet')
       const childWallet = PyramidGameWalletFactory.attach(childWalletAddr)

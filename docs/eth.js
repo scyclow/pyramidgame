@@ -279,8 +279,9 @@ export class Web3Provider {
     }
 
     const etherscanLink = this.ETHERSCAN_URLS[name] || ''
+    const addr = await this.isConnected()
 
-    return { name, chainId, hasName, network, etherscanLink }
+    return { name, chainId, hasName, network, etherscanLink, addr }
   }
 
   async contractEvents(contract, event, filterArgs) {

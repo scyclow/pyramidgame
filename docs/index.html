@@ -375,12 +375,12 @@
     }
 
 
-    #leaderboard-title {
+    .section-title {
       font-size: 3em;
     }
 
     @media (max-width:  530px) {
-      #leaderboard-title {
+      .section-title {
         font-size: 2em;
       }
     }
@@ -537,6 +537,26 @@
       animation: Blink 2s steps(2, start) infinite;
     }
 
+    .form-input input {
+      width: 20em;
+    }
+    @media (max-width: 530px) {
+
+      .form-input {
+        flex-direction: column;
+        align-items: center;
+      }
+      .form-input input {
+        font-size: 1.25em;
+        padding: 0.5em;
+        width: 100%;
+      }
+
+      .form-input button {
+        border-left: .15em solid;
+        margin-top: 0.25em;
+      }
+    }
 
   </style>
 
@@ -693,26 +713,25 @@
   </section>
 
   <!-- 1. How It Works -->
-  <section id="send">
-    <connect-wallet>
-      <div slot="connected">
-        <div id="howItWorksSection">
-          <div class="section-box">
-            <h2>How It Works</h2>
-            <ul>
-              <li>Pyramid Game is a zero-sum wealth redistirbution game that uses cutting-edge pyramid scheme technology. It is not a financial security.</li>
-              <li>All ETH sent to Pyramid Game is split proportionally among the 12 <a href="#leaderboard" class="a-normal">Leaderboard</a> members based on their prior contributions.</li>
-              <li>Leaderboard positions are represented by NFTs, and contributions from non-leaders are represented by the $PYRAMID token.</li>
-            </ul>
-            <a href="#docs" class="a-normal" style="margin-left: 1.5em;">Learn More →</a>
-          </div>
-        </div>
+  <section>
+
+    <div id="howItWorksSection">
+      <div class="section-box">
+        <h2 class="slowBlink" style="animation-delay: -1.5s; margin-bottom: 0.5em;">???</h2>
+        <h2>How It Works</h2>
+        <ul>
+          <li>Pyramid Game is a zero-sum wealth redistirbution game that uses cutting-edge pyramid scheme technology. It is not a financial security.</li>
+          <li>All ETH sent to Pyramid Game is split proportionally among the 12 <a href="#leaderboard" class="a-normal">Leaderboard</a> members based on their prior contributions.</li>
+          <li>Leaderboard positions are represented by NFTs, and contributions from non-leaders are represented by the $PYRAMID token.</li>
+        </ul>
+        <a href="#docs" class="a-normal" style="margin-left: 1.5em;">Learn More →</a>
       </div>
-    </connect-wallet>
+    </div>
+
   </section>
 
   <!-- 2. Send Input + Smart Messaging -->
-  <section>
+  <section  id="send">
     <connect-wallet>
       <div slot="connected">
         <div id="sendEthSection" class="center-v" style="margin: 2em auto;"></div>
@@ -725,7 +744,7 @@
     <div class="center-v">
       <connect-wallet>
         <div slot="connected">
-          <h2 id="leaderboard-title">Leaderboard</h2>
+          <h2 id="leaderboard-title" class="section-title">Leaderboard</h2>
           <div id="leaderboardStats" style="text-align: center; margin: 1.5em auto; font-size: 1.2em;"></div>
           <div id="leaderboard-board" class="leaderboard-grid"></div>
         </div>
@@ -746,7 +765,6 @@
   <section>
     <connect-wallet>
       <div slot="notConnected" class="center-v" style="margin: 2em auto;">
-        <h2>GET STARTED</h2>
         <connect-button>
           <button class="connectButton" slot="button" style="font-size: 1.5em;">Connect Wallet</button>
           <div slot="loading" class="slowBlink" style="font-size: 1.5em">Connecting...</div>
@@ -769,16 +787,21 @@
   </section>
 
 
+  <!-- 6. DISTRIBUTIONS -->
   <section class="center-v" id="distributions">
-    <h2>Latest Distributions</h2>
+    <h2 class="section-title">Latest Distributions</h2>
   </section>
 
 
-  <section class="center-v" id="disclaimer">
-    <p>Pyramid Game is not a financial security. It is a zero-sum wealth redistribution </p>
+  <section class="center-v" id="docs">
+    <h2 class="section-title">Documentation</h2>
     <p></p>
+    <p id="docs-recipient"></p>
+    <p id="docs-contributionBalance"></p>
+    <p id="docs-wallet"></p>
     <!-- <p>All players of Pyramid Game understand that (a) only leaderboard members will receive a portion of Pyramid Game distributions, (b) all distribution amounts are determined by </p> -->
   </section>
+
 
   <footer style="margin: 4em auto;"><a href="https://steviep.xyz" target="_blank" style="text-decoration: underline;">steviep.xyz</a> 2025</footer>
 
@@ -868,6 +891,8 @@
   const b64Clean = raw => raw.replace(/data.*,/, '')
 
   const handleTx = (txFn, errorId) => async () => {
+    const { etherscanLink, addr } = await provider.getNetwork()
+
     $.id(errorId).innerHTML = 'Pending...'
     try {
       const tx = await txFn()
@@ -878,7 +903,7 @@
       resetColors()
       setTimeout(() => {
         $.id(errorId).innerHTML = ''
-      }, 2000)
+      }, 4000)
     } catch (e) {
       $.id(errorId).innerHTML = e?.data?.message || e?.error?.message || e?.message || 'Something went wrong'
       console.error(e)
@@ -1034,21 +1059,28 @@
     const { PyramidGame } = await provider.getContracts()
     const { name: chainName, etherscanLink } = await provider.getNetwork()
 
-    const leadersAddr = await PyramidGame.leaders()
-    const PyramidGameLeaders = await provider.contract(leadersAddr, CONTRACTS.PyramidGameLeaders.abi)
+    const leaderboardAddr = await PyramidGame.leaderboard()
+    const PyramidGameLeaderboard = await provider.contract(leaderboardAddr, CONTRACTS.PyramidGameLeaderboard.abi)
 
-    const activeLeaderse = Number(await PyramidGameLeaders.totalSupply())
-    const leaderContributionTotal = ethVal(await PyramidGameLeaders.contributionTotal())
+    const activeLeaderse = Number(await PyramidGameLeaderboard.totalSupply())
+    const leaderContributionTotal = ethVal(await PyramidGameLeaderboard.contributionTotal())
 
     // Fetch all leader data
     const leaders = await Promise.all(times(activeLeaderse, async i => {
-      const owner = await PyramidGameLeaders.ownerOf(i)
+      const owner = await PyramidGameLeaderboard.ownerOf(i)
       const prettyAddrShort = await provider.formatAddr(owner)
       const prettyAddr = await provider.formatAddr(owner, false)
-      const contribution = ethVal(await PyramidGameLeaders.contributions(i))
-      const tokenURI = JSON.parse(utf8Clean(await PyramidGameLeaders.tokenURI(i)))
+      const contribution = ethVal(await PyramidGameLeaderboard.contributions(i))
+      const tokenURI = JSON.parse(utf8Clean(await PyramidGameLeaderboard.tokenURI(i)))
       const svg = extractSVG(tokenURI)
       const percentage = (contribution / leaderContributionTotal) * 100
+      const recipientAddr = await PyramidGameLeaderboard.recipientOf(i)
+      const recipient = recipientAddr !== ethers.constants.AddressZero ? recipientAddr : null
+      const recipientPretty = recipient ? await provider.formatAddr(recipient, false) : null
+
+      const approvedAddr = await PyramidGameLeaderboard.getApproved(i)
+      const approved = approvedAddr !== ethers.constants.AddressZero ? approvedAddr : null
+      const approvedPretty = approved ? await provider.formatAddr(approved, false) : null
 
       return {
         tokenId: i,
@@ -1058,7 +1090,11 @@
         prettyAddrShort,
         contribution,
         svg,
-        percentage
+        percentage,
+        recipient,
+        recipientPretty,
+        approved,
+        approvedPretty
       }
     }))
 
@@ -1097,10 +1133,10 @@
       <div style="text-align: center; margin-bottom: 1em;">
         <h3><strong>Connected as:</strong> ${prettyAddr}</h3>
 
-        <div class="invert">
+        <div class="invert" style="padding: 0.5em">
+          ${erc20Balance > 0 ? `<p>Your $PYRAMID Balance: <strong>${erc20Balance.toFixed(4)}</strong></p>` : ''}
           ${!userIsLeader ? `<p>Lowest Leaderboard contribution: <strong><span style="margin-right: 0.25em">Ξ</span>${lowestLeader.contribution.toFixed(4)}</strong></p>` : ''}
           ${userIsLeader ? `<p>Your Leaderboard Slot${userTokens.length > 1 ? 's' : ''}: <strong>${userTokens.map(l => l.tokenId + ` (${l.percentage.toFixed(2)}%)`).join(', ')}</strong></p>` : ''}
-          ${erc20Balance > 0 ? `<p>Your $PYRAMID Balance: <strong>${erc20Balance.toFixed(4)}</strong></p>` : ''}
         </div>
       </div>
       <div class="center">
@@ -1112,113 +1148,200 @@
     `
 
 
-    $.id('sendEthInput').oninput = createUpdateSendMessage({
-      erc20Balance,
-      userIsLeader,
-      lowestLeader,
-      userTokens,
-      leaderContributionTotal,
-      activeLeaderse,
-      getProjection
-    })
+    const sendEthInput = $.id('sendEthInput')
+    if (sendEthInput) {
+      sendEthInput.oninput = createUpdateSendMessage({
+        erc20Balance,
+        userIsLeader,
+        lowestLeader,
+        userTokens,
+        leaderContributionTotal,
+        activeLeaderse,
+        getProjection
+      })
+    }
 
-    $.id('sendEthBtn').onclick = handleTx(async () => {
-      $.id('sendEthMessage').innerHTML = ''
-      const amount = parseFloat($.id('sendEthInput').value)
-      if (!amount || amount <= 0) {
-        throw new Error('Invalid amount')
-      }
-      return await PyramidGame.contribute(txValue(amount))
-    }, 'sendEthError')
+    const sendEthBtn = $.id('sendEthBtn')
+    if (sendEthBtn) {
+      sendEthBtn.onclick = handleTx(async () => {
+        $.id('sendEthMessage').innerHTML = ''
+        const amount = parseFloat($.id('sendEthInput').value)
+        if (!amount || amount <= 0) {
+          throw new Error('Invalid amount')
+        }
+        return await PyramidGame.contribute(txValue(amount))
+      }, 'sendEthError')
+    }
 
     // === 4. Connected User Info ===
-    $.id('connectedUserInfo').innerHTML = `
-      <div style="text-align: center;">
-        ${userTokens.length > 0 ? `
-          <p><strong>Leader tokens:</strong> ${userTokens.map(t => `#${t.tokenId}`).join(', ')}</p>
+    const userTotalContribution = userTokens.reduce((sum, t) => sum + t.contribution, 0) + erc20Balance
+    const userPercentage = userTotalContribution > 0 ? (userTotalContribution / totalContributed) * 100 : 0
+
+    $.id('connectedUserInfo').innerHTML = (userIsLeader || erc20Balance > 0) ? `
+      <div class="center-v">
+        <h2 class="section-title">Your Assets</h2>
+        ${userTotalContribution > 0 ? `
+          <h3>Total Sent: <span style="margin-right: 0.25em">Ξ</span>${userTotalContribution.toFixed(4)}</h3>
+          <p>This is ${userPercentage.toFixed(2)}% of all contributions made</p>
+        ` : ''}
+        ${userIsLeader ? `
+          <h3>Leaderboard Slot${userTokens.length > 1 ? 's' : ''} Held: ${userTokens.map(t => `#${t.tokenId}`).join(', ')}</h3>
+          <h3>Your Payout: ${((userTokens.reduce((sum, t) => sum + t.contribution, 0) / leaderContributionTotal) * 100).toFixed(2)}%</h3>
+        ` : ''}
+        ${erc20Balance > 0 ? `
+          <h3>$PYRAMID Balance: ${erc20Balance.toFixed(4)}</h3>
         ` : ''}
       </div>
-    `
+    ` : ''
 
     // === 5. User Section ===
     let userSectionHTML = ''
-
-    // If user IS a leader
-    if (userIsLeader) {
-      const userTotalContribution = userTokens.reduce((sum, t) => sum + t.contribution, 0)
-      const userPercentage = (userTotalContribution / leaderContributionTotal) * 100
-
-      userSectionHTML += `
-        <div class="section-box">
-          <h2>You Are a Leader!</h2>
-          <p style="font-size: 1.5em;"><strong>You would receive ${userPercentage.toFixed(2)}%</strong> of future payouts</p>
-
-          <h3 style="margin-top: 2em;">Your Leader Tokens</h3>
-          <div class="token-grid">
-            ${userTokens.map(t => {
-              const escapedSVG = t.svg.replace(/"/g, '&quot;')
-              return `
-                <div class="token-item">
-                  <leader-svg svg="${escapedSVG}"></leader-svg>
-                  <div><strong>#${t.tokenId}</strong></div>
-                  <div><span style="margin-right: 0.25em">Ξ</span>${t.contribution.toFixed(4)}</div>
-                </div>
-              `
-            }).join('')}
-          </div>
-
-          ${erc20Balance > 0 ? `
-            <div style="margin-top: 2em;">
-              <h3>Add to Leader Contribution</h3>
-              <p>You have ${erc20Balance.toFixed(4)} Ξ worth of $PYRAMID tokens</p>
-              <div class="control-row">
-                <input id="addContribTokenId" class="tiny-input" placeholder="Token ID" style="width: 8em;">
-                <input id="addContribAmount" class="tiny-input" placeholder="Amount (Ξ)" style="width: 8em;">
-                <button id="addContribBtn" class="tiny-button">Add to Balance</button>
-              </div>
-              <div id="addContribError" class="error-message"></div>
-            </div>
-          ` : ''}
-        </div>
-      `
-    }
 
     // If user has ERC20 balance
     if (erc20Balance > 0) {
       const canClaimLeadership = erc20Balance > lowestLeader.contribution
 
-      userSectionHTML += `
-        <div class="section-box">
-          <h2>$PYRAMID Tokens</h2>
-          <p style="font-size: 1.5em; margin: 0.5em 0;"><strong>${erc20Balance.toFixed(4)} Ξ</strong> worth of $PYRAMID</p>
-
-          ${canClaimLeadership ? `
-            <div style="margin-top: 1.5em; padding: 1em; border: 2px solid var(--accent-color);">
-              <h3>Claim Leadership!</h3>
-              <p>You have enough $PYRAMID to claim a leader spot!</p>
-              <button id="claimLeadershipBtn" class="tiny-button">Claim Leadership</button>
+      if (!userIsLeader) {
+        if (canClaimLeadership) {
+          userSectionHTML += `
+            <div class="section-box center-v">
+              <p>Your $PYRAMID balance is high enough to get on the Leaderboard</p>
+              <button id="claimLeadershipBtn" class="tiny-button">Claim Leaderboard Slot</button>
               <div id="claimError" class="error-message"></div>
             </div>
-          ` : ''}
-
-          <div style="margin-top: 1.5em;">
-            <h3>Transfer $PYRAMID</h3>
-            <div class="control-row">
-              <input id="transferTo" class="tiny-input" placeholder="Recipient Address" style="width: 20em; max-width: 90vw;">
-              <input id="transferAmount" class="tiny-input" placeholder="Amount (Ξ)" style="width: 8em;">
-              <button id="transferBtn" class="tiny-button">Transfer</button>
+          `
+        } else {
+          userSectionHTML += `
+            <div class="section-box center-v">
+              <p>Lowest Leaderboard contribution: <strong><span style="margin-right: 0.25em">Ξ</span>${lowestLeader.contribution.toFixed(4)}</strong></p>
+              <p>You need to send <strong><span style="margin-right: 0.25em">Ξ</span>${(lowestLeader.contribution + 0.0001 - erc20Balance).toFixed(4)}</strong> more to get a Leaderboard slot</p>
             </div>
-            <div id="transferError" class="error-message"></div>
+          `
+        }
+      }
+    }
+
+    // For each leaderboard slot NFT
+    if (userIsLeader) {
+      userSectionHTML += userTokens.map(t => {
+        const escapedSVG = t.svg.replace(/"/g, '&quot;')
+        return `
+          <div class="section-box center-v">
+            <h3>${t.tokenName}</h3>
+            <leader-svg svg="${escapedSVG}" style="max-width: 300px; margin-top: 0.5em"></leader-svg>
+            <div style="margin: 0.25em 0"><strong>Contribution Balance:</strong> <span style="margin-right: 0.25em">Ξ</span>${t.contribution.toFixed(4)}</div>
+            <div><strong>Payout:</strong> ${t.percentage.toFixed(2)}%</div>
+
+            <div style="margin-top: 2em;">
+              ${t.approved ? `<p>${etherscanAddr(etherscanLink, t.approved, t.approvedPretty)} is approved to transfer this Leaderboard slot.</p>` : ''}
+              <div class="center form-input" style="margin-top: 0.25em">
+                <input id="approveSlot${t.tokenId}" class="tiny-input" placeholder="Approved Address" >
+                <button id="approveSlotBtn${t.tokenId}" class="small-button">Approve</button>
+                <div id="approveSlotError${t.tokenId}" class="error-message"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 2em;">
+              <div class="center form-input" style="margin-top: 0.25em">
+                <input id="transferSlot${t.tokenId}" class="tiny-input" placeholder="Transfer To Address" >
+                <button id="transferSlotBtn${t.tokenId}" class="small-button">Transfer</button>
+                <div id="transferSlotError${t.tokenId}" class="error-message"></div>
+              </div>
+            </div>
+
+            ${erc20Balance > 0 ? `
+              <div style="margin-top: 2em;">
+                <h4 style="margin-top: 1em; text-align: center">Add $PYRAMID to slot contribution balance<sup><a href="#docs-contributionBalance">?</a></sup></h4>
+                <div class="center form-input" style="margin-top: 0.25em">
+                  <input id="addContribAmount${t.tokenId}" class="tiny-input" placeholder="${erc20Balance.toFixed(2)} $PYRAMID">
+                  <button id="addContribBtn${t.tokenId}" class="small-button">Add</button>
+                  <div id="addContribMessage${t.tokenId}" style="margin-top: 0.5em; text-align: center;"></div>
+                  <div id="addContribError${t.tokenId}" class="error-message"></div>
+                </div>
+              </div>
+            ` : ''}
+
+            <div style="margin-top: 2em;">
+              ${t.recipient !== addr ? `<p>${etherscanAddr(etherscanLink, t.recipient, t.recipientPretty)} is currently receiving this Leaderboard slot's payouts.</p>` : ''}
+              <h4 style="margin-top: 1em; text-align: center">Set Payout Recipient<sup><a href="#docs-recipient">?</a></sup></h4>
+              <div class="center form-input" style="margin-top: 0.25em">
+                <input id="setRecipient${t.tokenId}" class="tiny-input" placeholder="Recipient Address" >
+                <button id="setRecipientBtn${t.tokenId}" class="small-button">Set</button>
+                <div id="setRecipientError${t.tokenId}" class="error-message"></div>
+              </div>
+            </div>
+
+          </div>
+        `
+      }).join('')
+
+      // Add Advanced section for wallet operations
+      userSectionHTML += `
+        <div class="section-box center-v">
+          <h2>Advanced<sup style="font-size:0.75em"><a href="#docs-wallet">?</a></sup></h2>
+          <h4 style="margin-top: 1em; text-align: center">Sign Wallet Transaction</h4>
+          <div style="max-width: 600px; margin: 0 auto;">
+            <div style="margin-top: 1em;">
+              <label style="display: block; margin-bottom: 0.25em;">Target Address:</label>
+              <input id="walletTxTarget" class="tiny-input" placeholder="0x..." style="width: 100%;">
+            </div>
+            <div style="margin-top: 1em; display: flex; gap: 1em;">
+              <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 0.25em;">Nonce:</label>
+                <input id="walletTxNonce" class="tiny-input" placeholder="0" type="number" style="width: 100%;">
+              </div>
+              <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 0.25em;">Value (ETH):</label>
+                <input id="walletTxValue" class="tiny-input" placeholder="0" step="0.01" type="number" style="width: 100%;">
+              </div>
+            </div>
+            <div style="margin-top: 1em;">
+              <label style="display: block; margin-bottom: 0.25em;">Function Signature:</label>
+              <input id="walletTxFnSig" class="tiny-input" placeholder="transfer(address,uint256)" style="width: 100%;">
+            </div>
+            <div style="margin-top: 1em;">
+              <label style="display: block; margin-bottom: 0.25em;">Function Arguments (JSON array):</label>
+              <input id="walletTxArgs" class="tiny-input" placeholder='["0x...", "1000000000000000000"]' style="width: 100%;">
+            </div>
+            <div class="center" style="margin-top: 1.5em;">
+              <button id="signWalletTxBtn" class="small-button">Sign Message</button>
+            </div>
+            <div id="walletTxSignature" style="margin-top: 1em; word-break: break-all; text-align: center;"></div>
+            <div id="walletTxError" class="error-message"></div>
           </div>
 
-          <div style="margin-top: 1.5em;">
-            <h3>Approve $PYRAMID</h3>
-            <div class="control-row">
-              <input id="approveSpender" class="tiny-input" placeholder="Spender Address" style="width: 20em; max-width: 90vw;">
-              <input id="approveAmount" class="tiny-input" placeholder="Amount (Ξ)" style="width: 8em;">
-              <button id="approveBtn" class="tiny-button">Approve</button>
+          <h4 style="margin-top: 2em; text-align: center">Execute Leader Transaction</h4>
+          <div style="max-width: 600px; margin: 0 auto;">
+            <div style="margin-top: 1em;">
+              <label style="display: block; margin-bottom: 0.25em;">Target Address:</label>
+              <input id="execTxTarget" class="tiny-input" placeholder="0x..." style="width: 100%;">
             </div>
-            <div id="approveError" class="error-message"></div>
+            <div style="margin-top: 1em; display: flex; gap: 1em;">
+              <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 0.25em;">Nonce:</label>
+                <input id="execTxNonce" class="tiny-input" placeholder="0" type="number" style="width: 100%;">
+              </div>
+              <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 0.25em;">Value (ETH):</label>
+                <input id="execTxValue" class="tiny-input" placeholder="0" step="0.01" type="number" style="width: 100%;">
+              </div>
+            </div>
+            <div style="margin-top: 1em;">
+              <label style="display: block; margin-bottom: 0.25em;">Encoded Data (0x...):</label>
+              <input id="execTxData" class="tiny-input" placeholder="0x..." style="width: 100%;">
+            </div>
+            <div style="margin-top: 1em;">
+              <label style="display: block; margin-bottom: 0.25em;">Leader Token IDs (JSON array):</label>
+              <input id="execTxTokenIds" class="tiny-input" placeholder='[0, 1, 2]' style="width: 100%;">
+            </div>
+            <div style="margin-top: 1em;">
+              <label style="display: block; margin-bottom: 0.25em;">Signatures (JSON array):</label>
+              <input id="execTxSignatures" class="tiny-input" placeholder='["0x...", "0x..."]' style="width: 100%;">
+            </div>
+            <div class="center" style="margin-top: 1.5em;">
+              <button id="execLeaderTxBtn" class="small-button">Execute Transaction</button>
+            </div>
+            <div id="execTxError" class="error-message"></div>
           </div>
         </div>
       `
@@ -1228,9 +1351,9 @@
     const pgBalance = ethVal(await provider.provider.getBalance(PyramidGame.address))
     if (pgBalance > 1e-8) {
       userSectionHTML += `
-        <div class="section-box">
+        <div class="section-box center-v">
           <h2>Force Distribution</h2>
-          <p>Pyramid Game contract balance: <span style="margin-right: 0.25em">Ξ</span>${pgBalance}</p>
+          <p>Pyramid Game contract balance: <span style="margin-right: 0.25em">Ξ</span>${pgBalance.toFixed(4)}</p>
           <button id="forceDistributeBtn" class="tiny-button">Force Distribution</button>
           <div id="forceDistributeError" class="error-message"></div>
         </div>
@@ -1240,43 +1363,173 @@
     $.id('userSection').innerHTML = userSectionHTML
 
     // Wire up event handlers
-    if (userIsLeader && erc20Balance > 0) {
-      $.id('addContribBtn').onclick = handleTx(async () => {
-        const tokenId = Number($.id('addContribTokenId').value)
-        const amount = parseFloat($.id('addContribAmount').value)
-        const tokenAmount = Math.floor(amount)
-        return await PyramidGame.addToLeaderContributionBalance(tokenId, tokenAmount)
-      }, 'addContribError')
+    if (userIsLeader) {
+      userTokens.forEach(t => {
+        // Set recipient button
+        const setRecipientBtn = $.id(`setRecipientBtn${t.tokenId}`)
+        if (setRecipientBtn) {
+          setRecipientBtn.onclick = handleTx(async () => {
+            const recipientInput = $.id(`setRecipient${t.tokenId}`).value
+            const recipient = provider.isENS(recipientInput)
+              ? await provider.fromENS(recipientInput)
+              : recipientInput
+            return await PyramidGameLeaderboard.setRecipient(t.tokenId, recipient)
+          }, `setRecipientError${t.tokenId}`)
+        }
+
+        // Approve slot button
+        const approveSlotBtn = $.id(`approveSlotBtn${t.tokenId}`)
+        if (approveSlotBtn) {
+          approveSlotBtn.onclick = handleTx(async () => {
+            const approveInput = $.id(`approveSlot${t.tokenId}`).value
+            const approvedAddress = provider.isENS(approveInput)
+              ? await provider.fromENS(approveInput)
+              : approveInput
+            return await PyramidGameLeaderboard.approve(approvedAddress, t.tokenId)
+          }, `approveSlotError${t.tokenId}`)
+        }
+
+        // Transfer slot button
+        const transferSlotBtn = $.id(`transferSlotBtn${t.tokenId}`)
+        if (transferSlotBtn) {
+          transferSlotBtn.onclick = handleTx(async () => {
+            const transferInput = $.id(`transferSlot${t.tokenId}`).value
+            const transferTo = provider.isENS(transferInput)
+              ? await provider.fromENS(transferInput)
+              : transferInput
+            return await PyramidGameLeaderboard.transferFrom(addr, transferTo, t.tokenId)
+          }, `transferSlotError${t.tokenId}`)
+        }
+
+        // Add contribution button
+        if (erc20Balance > 0) {
+          const addContribInput = $.id(`addContribAmount${t.tokenId}`)
+          if (addContribInput) {
+            addContribInput.oninput = () => {
+              const amount = parseFloat(addContribInput.value)
+              const messageEl = $.id(`addContribMessage${t.tokenId}`)
+              if (messageEl) {
+                if (!amount || amount <= 0) {
+                  messageEl.innerHTML = ''
+                } else {
+                  messageEl.innerHTML = `This will burn <strong>${amount.toFixed(4)} $PYRAMID</strong> and increase your Leaderboard slot's contribution balance by <strong><span style="margin-right: 0.25em">Ξ</span>${amount.toFixed(4)}</strong>`
+                }
+              }
+            }
+          }
+
+          const btn = $.id(`addContribBtn${t.tokenId}`)
+          if (btn) {
+            btn.onclick = handleTx(async () => {
+              const messageEl = $.id(`addContribMessage${t.tokenId}`)
+              if (messageEl) messageEl.innerHTML = ''
+              const amount = parseFloat($.id(`addContribAmount${t.tokenId}`).value)
+              const tokenAmount = ethers.utils.parseEther(String(amount))
+              return await PyramidGame.addToLeaderContributionBalance(t.tokenId, tokenAmount)
+            }, `addContribError${t.tokenId}`)
+          }
+        }
+      })
+
+      // Sign wallet transaction button
+      const signWalletTxBtn = $.id('signWalletTxBtn')
+      if (signWalletTxBtn) {
+        signWalletTxBtn.onclick = async () => {
+          const errorEl = $.id('walletTxError')
+          const signatureEl = $.id('walletTxSignature')
+
+          try {
+            errorEl.innerHTML = ''
+            signatureEl.innerHTML = ''
+
+            const target = $.id('walletTxTarget').value
+            const nonce = parseInt($.id('walletTxNonce').value || '0')
+            const valueInput = parseFloat($.id('walletTxValue').value || '0')
+            const value = ethers.utils.parseEther(String(valueInput))
+            const fnSig = $.id('walletTxFnSig').value
+            const argsInput = $.id('walletTxArgs').value
+
+            // Parse arguments
+            const args = argsInput ? JSON.parse(argsInput) : []
+
+            // Encode function data
+            const iface = new ethers.utils.Interface([`function ${fnSig}`])
+            const fnName = fnSig.split('(')[0]
+            const data = iface.encodeFunctionData(fnName, args)
+
+            // Create message hash to sign
+            const messageHash = ethers.utils.solidityKeccak256(
+              ['address', 'uint256', 'uint256', 'bytes'],
+              [target, nonce, value, data]
+            )
+
+            // Sign the message
+            const signer = provider.provider.getSigner()
+            const signature = await signer.signMessage(ethers.utils.arrayify(messageHash))
+
+            signatureEl.innerHTML = `
+              <p><strong>Signature:</strong></p>
+              <p style="font-family: monospace; background: var(--gray-color); padding: 0.5em; margin-top: 0.5em;">${signature}</p>
+              <p style="margin-top: 0.5em;"><strong>Message Hash:</strong></p>
+              <p style="font-family: monospace; background: var(--gray-color); padding: 0.5em; margin-top: 0.5em;">${messageHash}</p>
+              <p style="margin-top: 0.5em;"><strong>Encoded Data:</strong></p>
+              <p style="font-family: monospace; background: var(--gray-color); padding: 0.5em; margin-top: 0.5em;">${data}</p>
+            `
+          } catch (e) {
+            errorEl.innerHTML = e?.message || 'Something went wrong'
+            console.error(e)
+          }
+        }
+      }
+
+      // Execute leader transaction button
+      const execLeaderTxBtn = $.id('execLeaderTxBtn')
+      if (execLeaderTxBtn) {
+        execLeaderTxBtn.onclick = handleTx(async () => {
+          const target = $.id('execTxTarget').value
+          const nonce = parseInt($.id('execTxNonce').value || '0')
+          const valueInput = parseFloat($.id('execTxValue').value || '0')
+          const value = ethers.utils.parseEther(String(valueInput))
+          const data = $.id('execTxData').value
+          const tokenIdsInput = $.id('execTxTokenIds').value
+          const signaturesInput = $.id('execTxSignatures').value
+
+          // Parse arrays
+          const leaderTokenIds = JSON.parse(tokenIdsInput)
+          const signatures = JSON.parse(signaturesInput)
+
+          return await PyramidGame.executeLeaderTransaction(
+            target,
+            value,
+            data,
+            nonce,
+            leaderTokenIds,
+            signatures
+          )
+        }, 'execTxError')
+      }
     }
 
-    if (erc20Balance > 0) {
+    if (erc20Balance > 0 && !userIsLeader) {
       const canClaimLeadership = erc20Balance > lowestLeader.contribution
 
       if (canClaimLeadership) {
-        $.id('claimLeadershipBtn').onclick = handleTx(async () => {
-          return await PyramidGame.claimLeadership()
-        }, 'claimError')
+        const btn = $.id('claimLeadershipBtn')
+        if (btn) {
+          btn.onclick = handleTx(async () => {
+            return await PyramidGame.claimLeadership()
+          }, 'claimError')
+        }
       }
-
-      $.id('transferBtn').onclick = handleTx(async () => {
-        const to = $.id('transferTo').value
-        const amount = parseFloat($.id('transferAmount').value)
-        const tokenAmount = Math.floor(amount)
-        return await PyramidGame.transfer(to, tokenAmount)
-      }, 'transferError')
-
-      $.id('approveBtn').onclick = handleTx(async () => {
-        const spender = $.id('approveSpender').value
-        const amount = parseFloat($.id('approveAmount').value)
-        const tokenAmount = Math.floor(amount)
-        return await PyramidGame.approve(spender, tokenAmount)
-      }, 'approveError')
     }
 
-    if (pgBalance > 0) {
-      $.id('forceDistributeBtn').onclick = handleTx(async () => {
-        return await PyramidGame.forceDistribution()
-      }, 'forceDistributeError')
+    if (pgBalance > 1e-8) {
+      const btn = $.id('forceDistributeBtn')
+      if (btn) {
+        btn.onclick = handleTx(async () => {
+          return await PyramidGame.forceDistribution()
+        }, 'forceDistributeError')
+      }
     }
 
 
@@ -1298,14 +1551,14 @@
       }))
 
       $.id('distributions').innerHTML = `
-        <h2>Latest Contributions</h2>
+        <h2 class="section-title">Latest Contributions</h2>
         <div style="max-width: 800px; margin: 1em auto;">
           ${contributionRows.join('')}
         </div>
       `
     } else {
       $.id('distributions').innerHTML = `
-        <h2>Latest Contributions</h2>
+        <h2 class="section-title">Latest Contributions</h2>
         <p>No contributions yet</p>
       `
     }

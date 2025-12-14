@@ -4,7 +4,7 @@
 export const CONTRACTS = {
   PyramidGame: {
     addr: {
-      local: '0x8464135c8F25Da09e49BC8782676a84730C318bC',
+      local: '0xbdEd0D2bf404bdcBa897a74E6657f1f12e5C6fb6',
       sepolia: '0x3b0E151c9be53B6316Ef7E7B7A18FF2713C6D609',
       base: ''
     },
@@ -15,18 +15,19 @@ export const CONTRACTS = {
       'function claimLeadership() external',
       'function addToLeaderContributionBalance(uint256 tokenId, uint256 tokenAmount) external',
       'function outstandingContributions(address contributor) public view returns (uint256)',
-      'function leaders() external view returns (address)',
+      'function leaderboard() external view returns (address)',
       'function balanceOf(address account) public view returns (uint256)',
       'function transfer(address to, uint256 amount) public returns (bool)',
       'function approve(address spender, uint256 amount) public returns (bool)',
       'function allowance(address owner, address spender) public view returns (uint256)',
       'function transferFrom(address from, address to, uint256 amount) public returns (bool)',
       'function totalSupply() public view returns (uint256)',
+      'function executeLeaderTransaction(address target, uint256 value, bytes calldata data, uint256 txNonce, uint256[] calldata leaderTokenIds, bytes[] calldata signatures) external',
     ]
   },
-  PyramidGameLeaders: {
+  PyramidGameLeaderboard: {
     addr: {
-      local: '0x8398bCD4f633C72939F9043dB78c574A91C99c0A',
+      local: '0xdfd861B9bA6E7961b72140AbD74F5411197B981D',
       sepolia: '',
       base: ''
     },
@@ -39,12 +40,16 @@ export const CONTRACTS = {
       'function totalSupply() external view returns (uint256)',
       'function lowestLeader() external view returns (uint256 tokenId, uint256 amount)',
       'function setRecipient(uint256 tokenId, address recipient) external',
-      'function balanceOf(address owner) external view returns (uint256)'
+      'function recipientOf(uint256 tokenId) external view returns (address)',
+      'function balanceOf(address owner) external view returns (uint256)',
+      'function transferFrom(address from, address to, uint256 tokenId) external',
+      'function approve(address to, uint256 tokenId) external',
+      'function getApproved(uint256 tokenId) external view returns (address)'
     ]
   },
   PyramidGameWallet: {
     addr: {
-      local: '0x02299a3DcaB0938d0544130D054Bcbfb32B588C3',
+      local: '0xa06B7221053C11A19fbeeE1297aBc83F1BA0d7A3',
       sepolia: '',
       base: ''
     },
