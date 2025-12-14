@@ -253,10 +253,10 @@ describe('PyramidGame', () => {
       }
 
 
-      const claimLeadership = async (s) => {
+      const claimLeaderboardSlot = async (s) => {
         reorg(s, 0)
 
-        const r = await PG(s).claimLeadership()
+        const r = await PG(s).claimLeaderboardSlot()
         txs[s.address].push(r)
         return r
       }
@@ -315,7 +315,7 @@ describe('PyramidGame', () => {
 
       await transferCoin(signers[5], signers[7], 0.20001)
 
-      await claimLeadership(signers[7])
+      await claimLeaderboardSlot(signers[7])
       await addToLeaderContributionBalance(signers[0], 0, 0.01)
 
 

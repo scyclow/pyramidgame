@@ -1199,10 +1199,10 @@
 
     // If user has ERC20 balance
     if (erc20Balance > 0) {
-      const canClaimLeadership = erc20Balance > lowestLeader.contribution
+      const canClaimLeaderboardSlot = erc20Balance > lowestLeader.contribution
 
       if (!userIsLeader) {
-        if (canClaimLeadership) {
+        if (canClaimLeaderboardSlot) {
           userSectionHTML += `
             <div class="section-box center-v">
               <p>Your $PYRAMID balance is high enough to get on the Leaderboard</p>
@@ -1511,13 +1511,13 @@
     }
 
     if (erc20Balance > 0 && !userIsLeader) {
-      const canClaimLeadership = erc20Balance > lowestLeader.contribution
+      const canClaimLeaderboardSlot = erc20Balance > lowestLeader.contribution
 
-      if (canClaimLeadership) {
+      if (canClaimLeaderboardSlot) {
         const btn = $.id('claimLeadershipBtn')
         if (btn) {
           btn.onclick = handleTx(async () => {
-            return await PyramidGame.claimLeadership()
+            return await PyramidGame.claimLeaderboardSlot()
           }, 'claimError')
         }
       }

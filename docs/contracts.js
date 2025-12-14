@@ -12,7 +12,7 @@ export const CONTRACTS = {
       'event Contribution(address indexed sender, uint256 amount)',
       'event Distribution(address indexed recipient, uint256 amount)',
       'function contribute() external payable',
-      'function claimLeadership() external',
+      'function claimLeaderboardSlot() external',
       'function addToLeaderContributionBalance(uint256 tokenId, uint256 tokenAmount) external',
       'function outstandingContributions(address contributor) public view returns (uint256)',
       'function leaderboard() external view returns (address)',

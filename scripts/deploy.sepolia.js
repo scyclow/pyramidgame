@@ -43,10 +43,10 @@ async function main() {
   // signer[1] transfers some $PYRAMID to signer[2]
   await PG(1).transfer(signers[2].address, ethers.utils.parseEther('0.01'))  // Transfers 0.01 ETH worth of $PYRAMID
 
-  await signers[0].sendTransaction({
-    to: '0x8D55ccAb57f3Cba220AB3e3F3b7C9F59529e5a65',
-    ...txValue(10)
-  })
+  // await signers[0].sendTransaction({
+  //   to: '0x8D55ccAb57f3Cba220AB3e3F3b7C9F59529e5a65',
+  //   ...txValue(10)
+  // })
 
   const walletAddr = await PyramidGame.wallet()
 

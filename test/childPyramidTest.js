@@ -170,15 +170,15 @@ describe('PyramidGame Child Deployment', () => {
       expect(childWalletTotalERC20).to.be.closeTo(1.25, 0.01)
 
       // Step 6: Both child participants sign for child wallet to claim leadership on parent
-      // Prepare claimLeadership call
-      const claimLeadershipData = PyramidGame.interface.encodeFunctionData('claimLeadership')
+      // Prepare claimLeaderboardSlot call
+      const claimLeaderboardSlotData = PyramidGame.interface.encodeFunctionData('claimLeaderboardSlot')
       const txNonce = 1
 
       // Create message hash using abi.encode (not packed encoding)
       const messageHash = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
           ['address', 'uint256', 'bytes', 'uint256'],
-          [PyramidGame.address, 0, claimLeadershipData, txNonce]
+          [PyramidGame.address, 0, claimLeaderboardSlotData, txNonce]
         )
       )
 
@@ -191,7 +191,7 @@ describe('PyramidGame Child Deployment', () => {
       await childWallet.executeLeaderTransaction(
         PyramidGame.address,
         0,
-        claimLeadershipData,
+        claimLeaderboardSlotData,
         txNonce,
         [0, 1], // token IDs
         [sig1, sig2]
