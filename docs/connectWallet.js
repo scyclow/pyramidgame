@@ -1,5 +1,5 @@
-import {createComponent} from '../$.js'
-import {provider} from '../eth.js'
+import {createComponent} from './$.js'
+import {provider} from './eth.js'
 
 
 
