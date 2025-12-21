@@ -1573,6 +1573,15 @@
             </div>
             <div id="execTxError" class="error-message"></div>
           </div>
+
+          <a class="canlink-style" href="https://etherscan.io/address/0xcc88a0a881561148A8DaC357e385142Bb724057a" target="_blank" rel="nofollow" style="margin-top: 1em">
+            PyramidGameWallet<svg xmlns="http://www.w3.org/2000/svg" width="0.6em" viewBox="0 0 156 184" fill="none" style="margin-left: 0.25em; margin-top: 0em;">
+              <rect x="6" y="6" width="144" height="172" stroke-width="23"/>
+              <path d="M32 52H124" stroke-width="15"/>
+              <path d="M32 92H124" stroke-width="15"/>
+              <path d="M32 131H124" stroke-width="15"/>
+            </svg>
+          </a>
         </div>
       `
     }
@@ -1950,8 +1959,17 @@
     }
 
     addEtherscanLinks('scanlink', 'PyramidGame', chainName)
-    resetColors()
+
+    if (loaded) {
+      resetColors()
+    }
+
   }
+
+  let loaded = false
+  setTimeout(() => {
+    loaded = true
+  }, 5000)
 
   // Load custom game from URL parameter, then render
   provider.onConnect(async (addr) => {
@@ -1970,39 +1988,40 @@
   let colorList = []
 
   function resetColors() {
-  const colors = [
-   'var(--green-color)',
-   'var(--black-color)',
-   'var(--blue-color)',
-   'var(--red-color)',
-  ].sort(() => Math.random() - 0.5)
+    const colors = [
+     'var(--green-color)',
+     'var(--black-color)',
+     'var(--blue-color)',
+     'var(--red-color)',
+    ].sort(() => Math.random() - 0.5)
 
 
 
 
-  setColor('--bg-color', colors[0])
-  setColor('--font-color', colors[1])
-  setColor('--accent-color', colors[2])
-  setColor('--error-color', colors[3])
+    setColor('--bg-color', colors[0])
+    setColor('--font-color', colors[1])
+    setColor('--accent-color', colors[2])
+    setColor('--error-color', colors[3])
 
-  if (colors[1] === 'var(--red-color)') {
-    setColor('--gray-color', '#0e413c')
-  } else if (colors[1] === 'var(--blue-color)') {
-    setColor('--gray-color', '#27887e')
-  } else if (colors[1] === 'var(--green-color)') {
-    setColor('--gray-color', '#5c7471')
-  } else {
-    setColor('--gray-color', '#a1bebb')
+    if (colors[1] === 'var(--red-color)') {
+      setColor('--gray-color', '#0e413c')
+    } else if (colors[1] === 'var(--blue-color)') {
+      setColor('--gray-color', '#27887e')
+    } else if (colors[1] === 'var(--green-color)') {
+      setColor('--gray-color', '#5c7471')
+    } else {
+      setColor('--gray-color', '#a1bebb')
+    }
+
+    if (colorList[0] === colors[0]) resetColors()
+    else colorList = colors
   }
-
-  if (colorList[0] === colors[0]) resetColors()
-  else colorList = colors
-
-
-}
 
 
 $.id('logo').onclick = resetColors
+
+  resetColors()
+
 
 
 
