@@ -139,8 +139,8 @@ describe('PyramidGame Child Deployment', () => {
       const childLeadersAddr = await childPyramid.leaderboard()
       const childLeaders = PyramidGameLeaderboardFactory.attach(childLeadersAddr)
 
-      const PyramidGameWalletFactory = await ethers.getContractFactory('PyramidGameWallet')
-      const childWallet = PyramidGameWalletFactory.attach(childWalletAddr)
+      const PyramidGameLeaderboardWalletFactory = await ethers.getContractFactory('PyramidGameLeaderboardWallet')
+      const childWallet = PyramidGameLeaderboardWalletFactory.attach(childWalletAddr)
 
       // Step 3: Child wallet should have parent ERC20 (0.75)
       const childWalletParentERC20 = ethVal(await PyramidGame.balanceOf(childWalletAddr))

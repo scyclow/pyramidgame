@@ -31,12 +31,12 @@ import "./PyramidGameLeaderboard.sol";
 
 pragma solidity ^0.8.30;
 
-/// @title Pyramid Game Wallet
+/// @title Pyramid Game Leaderboard Wallet
 /// @author steviep.eth
 /// @notice Wallet contract that executes transactions approved by majority of leaders
 /// @dev Uses a multisig pattern where leader NFT owners sign off-chain messages to authorize transactions.
 ///      Requires majority (>50%) of leaders to sign for execution.
-contract PyramidGameWallet {
+contract PyramidGameLeaderboardWallet {
   /// @notice Reference to the PyramidGame contract
   PyramidGame public pyramidGame;
 
@@ -64,12 +64,15 @@ contract PyramidGameWallet {
 
 
   /// @notice Execute a transaction if signed by majority of leaders
-  /// @param target The contract to call
-  /// @param value The ETH value to send with the call
-  /// @param data The call data
-  /// @param txNonce The nonce for this transaction
-  /// @param leaderTokenIds Array of leader token IDs voting
-  /// @param signatures Array of signatures from leader token owners (in same order as leaderTokenIds)
+  /// @dev Leaders sign an EIP-191 formatted message containing the transaction details
+  ///      Requires >50% of leader NFT owners to sign
+  ///      Uses nonces to prevent replay attacks
+  /// @param target The contract address to call
+  /// @param value The ETH value to send with the call (in wei)
+  /// @param data The calldata to send
+  /// @param txNonce A unique nonce for this transaction (prevents replay attacks)
+  /// @param leaderTokenIds Array of leader token IDs whose owners are signing
+  /// @param signatures Array of EIP-191 signatures from leader token owners (must match order of leaderTokenIds)
   function executeLeaderTransaction(
     address target,
     uint256 value,
@@ -101,7 +104,10 @@ contract PyramidGameWallet {
   }
 
 
-  /// @dev Recover signer from signature
+  /// @dev Recover the signer address from an EIP-191 signature
+  /// @param ethSignedMessageHash The EIP-191 formatted message hash
+  /// @param signature The signature bytes (65 bytes: r, s, v)
+  /// @return address The address that created the signature
   function recoverSigner(bytes32 ethSignedMessageHash, bytes memory signature) internal pure returns (address) {
     require(signature.length == 65, 'Invalid signature length');
 
@@ -121,18 +127,26 @@ contract PyramidGameWallet {
 
   // BOILERPLATE
 
-
+  /// @notice Receive function allows the wallet to accept ETH transfers
   receive() external payable {}
+
+  /// @notice Fallback function allows the wallet to accept calls with data
   fallback() external payable {}
 
+  /// @notice ERC-721 token receiver - allows wallet to receive NFTs
+  /// @return bytes4 The function selector to confirm receipt
   function onERC721Received(address, address, uint256, bytes calldata) external pure returns(bytes4) {
     return this.onERC721Received.selector;
   }
 
+  /// @notice ERC-1155 token receiver - allows wallet to receive ERC-1155 tokens
+  /// @return bytes4 The function selector to confirm receipt
   function onERC1155Received(address, address, uint256, uint256, bytes calldata) external pure returns (bytes4) {
     return this.onERC1155Received.selector;
   }
 
+  /// @notice ERC-1155 batch token receiver - allows wallet to receive multiple ERC-1155 tokens
+  /// @return bytes4 The function selector to confirm receipt
   function onERC1155BatchReceived(address, address, uint256[] calldata, uint256[] calldata, bytes calldata) external pure returns (bytes4) {
     return this.onERC1155BatchReceived.selector;
   }

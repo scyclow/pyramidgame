@@ -52,7 +52,7 @@ async function main() {
 
   console.log('PyramidGame:', PyramidGame.address)
   console.log('PyramidGameLeaderboard:', leadersAddr)
-  console.log('PyramidGameWallet:', walletAddr)
+  console.log('PyramidGameLeaderboardWallet:', walletAddr)
   console.log('\nGame State:')
   console.log('- All 12 leaderboard slots filled')
   console.log('- Lowest leader (signer[4]) has 0.01 ETH')

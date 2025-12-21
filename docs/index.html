@@ -8,23 +8,23 @@
   <link rel="shortcut icon" type="image/x-icon" href="./logo.svg" id="favicon">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="description" content="">
-  <meta name="keywords" content="pyramid game, pyramid, game, steviep, steve pikelny, pikelny, crypto, ethereum, eth, bitcoin, scam, pyramid scheme, scheme">
+  <meta name="description" content="Pyramid Game is a zero-sum wealth redistribution game that uses cutting-edge pyramid scheme technology. It is not a financial security.">
+  <meta name="keywords" content="pyramid game, pyramidgame, pyramidgame.eth, pyramid, game, scheme, pyramid scheme, steviep, steve pikelny, pikelny, crypto, ethereum, eth, bitcoin, scam, scam art, blockchain, onchain art, art">
 
-  <meta name="twitter:image" content="h">
-  <meta name="twitter:image:alt" content="">
+  <meta name="twitter:image" content="https://pyramidgame.eth.limo/thumbnail.png">
+  <meta name="twitter:image:alt" content="$ -> ▲">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:creator" content="@steviepxyz">
   <meta name="twitter:site" content="@steviepxyz">
-  <meta property="twitter:description" content="">
+  <meta property="twitter:description" content="Pyramid Game is a zero-sum wealth redistribution game that uses cutting-edge pyramid scheme technology. It is not a financial security.">
 
-  <meta name="og:image" property="og:image" content="">
-  <meta name="og:image:alt" content="">
+  <meta name="og:image" property="og:image" content="https://pyramidgame.eth.limo/thumbnail.png">
+  <meta name="og:image:alt" content="$ -> ▲">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="">
-  <meta property="og:title" content="">
-  <meta property="og:site_name" content="">
-  <meta property="og:description" content="">
+  <meta property="og:url" content="https://pyramidgame.eth.limo">
+  <meta property="og:title" content="Pyramid Game">
+  <meta property="og:site_name" content="Pyramid Game">
+  <meta property="og:description" content="Pyramid Game is a zero-sum wealth redistribution game that uses cutting-edge pyramid scheme technology. It is not a financial security.">
 
 
   <link rel="stylesheet" type="text/css" href="./styles.css">
@@ -40,7 +40,10 @@
       text-align: center;
     }
 
-
+    #docs h2, #docs h3, #docs h4, #docs h5 {
+      text-align: left;
+      margin-top: 1em;
+    }
 
     .slowBlink {
       animation: Blink 3s steps(2, start) infinite;
@@ -558,6 +561,26 @@
       }
     }
 
+
+
+    #docs h3, #docs h4 {
+      text-align: left;
+    }
+
+    #docs h3 {
+      margin-top: 2em;
+      font-size: 2em;
+    }
+    #docs h4 {
+      margin-top: 1em;
+      font-size: 1.5em;
+    }
+
+    #docs p {
+      /*text-indent: 1em;*/
+      margin-bottom: 2em;
+    }
+
   </style>
 
 
@@ -720,8 +743,8 @@
         <h2 class="slowBlink" style="animation-delay: -1.5s; margin-bottom: 0.5em;">???</h2>
         <h2>How It Works</h2>
         <ul>
-          <li>Pyramid Game is a zero-sum wealth redistirbution game that uses cutting-edge pyramid scheme technology. It is not a financial security.</li>
-          <li>All ETH sent to Pyramid Game is split proportionally among the 12 <a href="#leaderboard" class="a-normal">Leaderboard</a> members based on their prior contributions.</li>
+          <li>Pyramid Game is a zero-sum wealth redistribution game that uses cutting-edge pyramid scheme technology. It is not a financial security.</li>
+          <li>All ETH sent to Pyramid Game is split proportionally among the 12 <a href="#leaderboard" class="a-normal">leaderboard</a> players based on their prior contributions.</li>
           <li>Leaderboard positions are represented by NFTs, and contributions from non-leaders are represented by the $PYRAMID token.</li>
         </ul>
         <a href="#docs" class="a-normal" style="margin-left: 1.5em;">Learn More →</a>
@@ -747,7 +770,9 @@
       <connect-wallet>
         <div slot="connected">
           <div id="leaderboardStats" style="text-align: center; margin: 1.5em auto; font-size: 1.2em;"></div>
-          <div id="leaderboard-board" class="leaderboard-grid"></div>
+          <div id="leaderboard-board" class="leaderboard-grid">
+            <div class="fastBlink" style="text-align: center; padding: 2em;">Loading...</div>
+          </div>
         </div>
 
         <div slot="notConnected">
@@ -782,7 +807,9 @@
   <section>
     <connect-wallet>
       <div slot="connected">
-        <div id="userSection"></div>
+        <div id="userSection">
+          <div class="fastBlink" style="text-align: center; padding: 2em;">Loading...</div>
+        </div>
       </div>
     </connect-wallet>
   </section>
@@ -794,18 +821,158 @@
     <div slot="connected">
       <section class="center-v" id="distributions">
         <h2 class="section-title">Latest Distributions</h2>
+        <div class="fastBlink" style="text-align: center; padding: 2em;">Loading...</div>
       </section>
     </div>
   </connect-wallet>
 
 
-  <section class="center-v" id="docs">
+  <!-- 7. RELATED GAMES -->
+  <connect-wallet>
+    <div slot="connected">
+      <section class="center-v" id="relatedGames">
+
+        <h2 class="section-title">Related Games</h2>
+        <div style="max-width: 800px; margin: 1em auto;">
+          <div id="childGames">
+            <div class="fastBlink" style="text-align: center; padding: 2em;">Loading...</div>
+          </div>
+
+          <div style="max-width: 600px; margin: 2em auto 0; border: 2px solid; padding: 1.5em; padding-top: 0.5em;">
+            <div style="margin-top: 1em; text-align: center">
+              <label style="display: block; margin-bottom: 0.25em;">Initial Contribution:</label>
+              <input id="createChildInput" placeholder="0.01 Ξ" type="number" step="0.01" style="width: 10.1em">
+            </div>
+            <div class="center" style="margin-top: 1.5em;">
+              <button id="createChildBtn" class="small-button">Create Child Game</button>
+            </div>
+            <div id="createChildError" class="error-message" style="text-align: center; margin-top: 0.25em"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </connect-wallet>
+
+
+  <section id="docs">
     <h2 class="section-title">Documentation</h2>
-    <p></p>
-    <p id="docs-recipient"></p>
-    <p id="docs-contributionBalance"></p>
-    <p id="docs-wallet"></p>
-    <!-- <p>All players of Pyramid Game understand that (a) only leaderboard members will receive a portion of Pyramid Game distributions, (b) all distribution amounts are determined by </p> -->
+
+    <h3>Summary</h3>
+    <p>All ETH sent to the Pyramid Game contract is split proportionally among the leaders.</p>
+
+    <h3>Contributions</h3>
+    <p>The contribution workflow is initiated whenever ETH is sent to the Pyramid Game contract, or an address calls the <code>contribute</code> function. This workflow is split into two phases: distribution and reorg.</p>
+
+    <h4 id="docs-distribution">Distribution</h4>
+    <p>In the distribution phase, the value of the contribution is divided among the leaderboard holders. This split is proportional based on how much they have directly or indirectly contributed.</p>
+
+    <!-- TODO: Add interactive example or table showing distribution calculation
+         Example structure:
+         Leader        Contributed    % Share    Receives (from 1 ETH)
+         Bob           2.5 ETH        50%        0.5 ETH
+         Charlie       1.0 ETH        20%        0.2 ETH
+         Diane         0.75 ETH       15%        0.15 ETH
+         Eve           0.5 ETH        10%        0.1 ETH
+         Frank         0.25 ETH       5%         0.05 ETH
+         Total         5.0 ETH        100%       1.0 ETH
+    -->
+
+    <h4 id="docs-reorg">Reorg</h4>
+    <p>Following the distribution phase, there is a reorg phase in which the original sender's contribution is accounted for. If their contribution is high enough, this will <a href="#docs-leaderboard">enter them onto the leaderboard</a>. Otherwise, the sender will <a href="#docs-pyramid">receive $PYRAMID as a placeholder</a>.</p>
+
+    <!-- TODO: Add table or diagram showing before/after leaderboard state
+         Show how a new contribution triggers reorg and potentially replaces lowest leader
+    -->
+
+
+
+    <h3 id="docs-leaderboard">Leaderboard</h3>
+    <p>Each leaderboard slot is represented by an ERC-721 token with unique onchain art. All distributions are made to token owners (or <a href="#docs-recipient">designated recipients</a>) in proportion to the token's contribution amounts. Note that the contribution amount is tied to the leaderboard token, not the sending address.</p>
+
+    <p>Pyramid Game is configured for a 12-player leaderboard. As a result, the first 12 players to send ETH will join the leaderboard and receive a unique leaderboard token. After this point, the leaderboard token with the lowest contribution amount will be transferred from existing holders to new entrants. Upon transfer, the token's contribution amount will be updated to reflect the new leader's contribution. The displaced leader will be compensated with <a href="#docs-pyramid">$PYRAMID</a> equal to their contribution balance.</p>
+
+    <p>If a player makes a contribution while already owning a leaderboard token, the token's contribution amount will be updated to reflect that transaction. In the event that a player owns multiple leaderboard tokens, only the token with the lowest token ID will be updated.</p>
+
+    <!-- TODO: Add section explaining leaderboard token metadata and artwork generation -->
+
+    <h4 id="docs-recipient">Recipient</h4>
+    <p>Owners (or approved operators) of Pyramid Game leaderboard tokens may opt to forward all distributions to another address. The recipient address is reset on token transfer. Recursive payments back to the Pyramid Game contract are disallowed.</p>
+
+    <h3 id="docs-pyramid">$PYRAMID</h3>
+    <p>$PYRAMID is an ERC-20 token that acts as a placeholder for all contributions made to Pyramid Game. Players will receive $PYRAMID in two circumstances: (a) if their leaderboard token is transferred to another player during a <a href="#docs-reorg">reorg</a>, they will receive an amount of $PYRAMID equal to their contribution balance; and (b) if a non-leader makes a contribution that does not bring them into the leaderboard, they will receive an amount of $PYRAMID equal to the amount of ETH they sent.</p>
+
+    <p>If a player makes a contribution, and the sum of their contribution amount and current $PYRAMID balance is greater than the lowest leader's contribution amount, then that player will receive the leaderboard token and their outstanding $PYRAMID balance will be burned.</p>
+
+    <p>If a player accrues enough $PYRAMID to enter the leaderboard through the secondary market, they can trigger a manual reorg by calling <code>claimLeaderboardSlot</code>.</p>
+
+    <!-- TODO: Add visual diagram showing $PYRAMID mint/burn mechanics -->
+
+    <p id="docs-contributionBalance">$PYRAMID may also be used to directly increase the contribution amount of a leaderboard token by calling <code>addToLeaderContributionBalance</code>.</p>
+
+    <h3 id="docs-childGames">Child Pyramid Games</h3>
+    <p>At any point, a player may create a child Pyramid Game based on a parent game. When creating a new child game, the player must make an initial contribution, which will enter that player into the first slot on the child game's leaderboard. The initial contribution will go towards the parent game. All assets related to the parent game (i.e., leaderboard tokens and $PYRAMID) will go to the child game's <a href="#docs-wallet">leaderboard wallet</a>. As a result, child Pyramid Games may be an effective way to coordinate participation in parent games.</p>
+
+
+    <h4 id="docs-wallet">Leaderboard Wallet</h4>
+    <p>The leaderboard wallet is a multisig that requires a simple majority of votes from all leaders to execute any action. This may involve transferring assets (leaderboard tokens or $PYRAMID), distributing accrued ETH from parent Pyramid Games, updating the metadata of the leaderboard tokens, or upgrading to a new wallet contract.</p>
+
+    <p>To execute a transaction, more than 50% of leaders must sign off-chain messages approving the action. Each signature verifies that the leader (or their approved operator) controls their leaderboard NFT. Once sufficient signatures are collected, anyone can submit the transaction on-chain via <code>executeLeaderTransaction</code>.</p>
+
+    <!-- TODO: Link to wallet interface tool or script examples for generating signatures -->
+
+    <h3 id="docs-contracts">Contract Interfaces</h3>
+    <!-- TODO: Auto-generate this section from NatSpec doc comments in Solidity contracts
+         Include:
+         - Contract addresses on each network
+         - Key functions with parameters and descriptions
+         - Events emitted by each contract
+         - Links to etherscan/basescan for verified contracts
+    -->
+
+    <h4>PyramidGame</h4>
+    <p>The main contract combining pyramid scheme distribution logic with ERC-20 token functionality.</p>
+
+    <p><strong>Key Functions:</strong></p>
+    <ul>
+      <li><code>contribute() payable</code> - Main entry point for sending ETH to the game</li>
+      <li><code>claimLeaderboardSlot()</code> - Manually claim a leaderboard position using your $PYRAMID balance</li>
+      <li><code>addToLeaderContributionBalance(tokenId, amount)</code> - Burn $PYRAMID to increase a leader's contribution amount</li>
+      <li><code>deployChildPyramidGame(name, tokenSymbol, leaderSymbol) payable</code> - Create a child Pyramid Game</li>
+      <li><code>balanceOf(address)</code>, <code>transfer(to, amount)</code>, <code>approve(spender, amount)</code> - Standard ERC-20 functions for $PYRAMID</li>
+      <li><code>leaderboard()</code> - Returns the address of the leaderboard contract</li>
+      <li><code>wallet()</code> - Returns the address of the multisig wallet contract</li>
+    </ul>
+
+    <h4>PyramidGameLeaderboard</h4>
+    <p>ERC-721 contract managing leaderboard positions with onchain metadata.</p>
+
+    <p><strong>Key Functions:</strong></p>
+    <ul>
+      <li><code>contributions(tokenId)</code> - Returns the contribution amount for a specific leader token</li>
+      <li><code>recipientOf(tokenId)</code> - Returns the distribution recipient address (defaults to token owner)</li>
+      <li><code>setRecipient(tokenId, address)</code> - Set a custom recipient for distributions</li>
+      <li><code>lowestLeader()</code> - Returns the token ID and contribution amount of the lowest leader</li>
+      <li><code>getAllLeaderData()</code> - Batch read all leader data in a single call</li>
+      <li><code>contributionTotal()</code> - Returns the sum of all leader contribution balances</li>
+      <li><code>ownerOf(tokenId)</code>, <code>transferFrom(from, to, tokenId)</code>, <code>approve(to, tokenId)</code> - Standard ERC-721 functions</li>
+    </ul>
+
+    <h4>PyramidGameLeaderboardWallet</h4>
+    <p>Multisig wallet contract controlled by leaderboard NFT holders.</p>
+
+    <p><strong>Key Functions:</strong></p>
+    <ul>
+      <li><code>executeLeaderTransaction(target, value, data, nonce, tokenIds[], signatures[])</code> - Execute a transaction with majority approval</li>
+      <li><code>nonceUsed(nonce)</code> - Check if a nonce has been used (prevents replay attacks)</li>
+    </ul>
+
+    <p><strong>Signature Format:</strong> Leaders sign EIP-191 formatted messages containing <code>keccak256(abi.encode(target, value, data, nonce))</code>. Each signature must correspond to a leader NFT owner or approved operator.</p>
+
+    <!-- TODO: Add helper tools/scripts for generating signatures and coordinating multisig transactions -->
+
+
+    <!-- TODO: Add code examples for listening to events with ethers.js/web3.js -->
+
   </section>
 
 
@@ -857,7 +1024,58 @@
 <script type="module">
   import {provider, etherscanAddr, addEtherscanLinks, ethVal, txValue} from './eth.js'
   import {CONTRACTS} from './contracts.js'
-  import {$} from './$.js'
+  import {$, queryParams} from './$.js'
+
+  // Store original root game addresses before any modifications
+  const ROOT_GAME_ADDRESSES = {
+    local: CONTRACTS.PyramidGame.addr.local,
+    sepolia: CONTRACTS.PyramidGame.addr.sepolia,
+    base: CONTRACTS.PyramidGame.addr.base,
+    mainnet: CONTRACTS.PyramidGame.addr.mainnet
+  }
+
+  // Function to load custom game details from URL parameter
+  async function loadCustomGame() {
+    const customGameAddress = queryParams.address
+
+    if (!customGameAddress || !ethers.utils.isAddress(customGameAddress)) {
+      return
+    }
+
+    try {
+      // Get network and create contract instance
+      const { name: networkKey } = await provider.getNetwork()
+      const customGame = await provider.contract(customGameAddress, CONTRACTS.PyramidGame.abi)
+
+      // Fetch game details
+      const [gameName, leaderboardAddr] = await Promise.all([
+        customGame.name(),
+        customGame.leaderboard()
+      ])
+
+      // Update h1 with game name
+      const $h1 = document.querySelector('h1')
+      if ($h1 && gameName) {
+        $h1.textContent = gameName
+      }
+
+      // Update CONTRACTS with custom addresses
+      CONTRACTS.PyramidGame.addr[networkKey] = customGameAddress
+      CONTRACTS.PyramidGameLeaderboard.addr[networkKey] = leaderboardAddr
+
+      // Try to get wallet address if the contract has one
+      try {
+        const walletAddr = await customGame.wallet()
+        if (walletAddr && ethers.utils.isAddress(walletAddr)) {
+          CONTRACTS.PyramidGameLeaderboardWallet.addr[networkKey] = walletAddr
+        }
+      } catch (e) {
+        // Wallet function may not exist, silently continue
+      }
+    } catch (e) {
+      // Silently fail and use default contracts
+    }
+  }
 
   // Define leader-svg web component with isolated styles
   class LeaderSVG extends HTMLElement {
@@ -906,7 +1124,6 @@
       await tx.wait(1)
       renderPage(addr)
       $.id(errorId).innerHTML = 'Success!'
-      resetColors()
       setTimeout(() => {
         $.id(errorId).innerHTML = ''
       }, 4000)
@@ -1114,9 +1331,10 @@
 
     // Render stats
     $.id('leaderboardStats').innerHTML = `
-      <div style="display: flex; justify-content: center; gap: 2em; flex-wrap: wrap;">
-        <div><strong>Sent by Leaders:</strong> <span style="margin-right: 0.25em">Ξ</span>${leaderContributionTotal.toFixed(4)}</div>
+      <div style="display: flex; justify-content: center; gap: 0.5em 2em; flex-wrap: wrap;">
         <div><strong>Total Sent:</strong> <span style="margin-right: 0.25em">Ξ</span>${totalContributed.toFixed(4)}</div>
+        <div><strong>Sent by Leaders:</strong> <span style="margin-right: 0.25em">Ξ</span>${leaderContributionTotal.toFixed(4)}</div>
+        <div><strong>Lowest Leader:</strong> #${lowestLeader.tokenId} (<span style="margin-right: 0.25em">Ξ</span>${lowestLeader.contribution.toFixed(4)})</div>
       </div>
     `
 
@@ -1588,22 +1806,171 @@
       `
     }
 
+    // Recursive function to render game tree
+    async function renderGameTree(gameAddress, indentLevel = 0) {
+      try {
+        const gameContract = await provider.contract(gameAddress, CONTRACTS.PyramidGame.abi)
+        const [gameName, totalChildren] = await Promise.all([
+          gameContract.name(),
+          gameContract.totalChildren()
+        ])
+
+        // Check if this is the root game
+        const { name: networkKey } = await provider.getNetwork()
+        const rootGameAddr = ROOT_GAME_ADDRESSES[networkKey]
+        const isRootGame = rootGameAddr && gameAddress.toLowerCase() === rootGameAddr.toLowerCase()
+        const gameLink = isRootGame ? '/' : `?address=${gameAddress}`
+
+        const indentPx = indentLevel * 30
+        let html = `
+          <div style="margin: 0.5em 0; padding-left: ${indentPx}px; text-align: left;">
+            <a href="${gameLink}" style="text-decoration: underline; word-break: break-all;">
+              ${gameName}
+            </a>
+          </div>
+        `
+
+        // Recursively render children
+        const numChildren = Number(totalChildren)
+        if (numChildren > 0) {
+          for (let i = 0; i < numChildren; i++) {
+            const childAddress = await gameContract.children(i)
+            html += await renderGameTree(childAddress, indentLevel + 1)
+          }
+        }
+
+        return html
+      } catch (e) {
+        return ''
+      }
+    }
+
+    // Render related games section (children and parent)
+    const totalChildren = Number(await PyramidGame.totalChildren())
+
+    // Check if this game has a parent
+    let parentGameHTML = ''
+    try {
+      const parentAddr = await PyramidGame.parent()
+      if (parentAddr && parentAddr !== ethers.constants.AddressZero) {
+        const parentContract = await provider.contract(parentAddr, CONTRACTS.PyramidGame.abi)
+        const parentName = await parentContract.name()
+
+        // Check if parent is the root game
+        const { name: networkKey } = await provider.getNetwork()
+        const rootGameAddr = ROOT_GAME_ADDRESSES[networkKey]
+        const isRootGame = rootGameAddr && parentAddr.toLowerCase() === rootGameAddr.toLowerCase()
+        const parentLink = isRootGame ? '/' : `?address=${parentAddr}`
+
+        const headerHTML = isRootGame ? '' : '<h3 style="text-align: center;">Parent</h3>'
+
+        parentGameHTML = `
+          <div style="margin-bottom: 2em;">
+            ${headerHTML}
+            <div style="margin-bottom: 1em; text-align: left;">
+              <a href="${parentLink}" style="text-decoration: underline; word-break: break-all;">
+                ${parentName}
+              </a>
+            </div>
+          </div>
+        `
+      }
+    } catch (e) {
+      // Parent function may not exist or may return zero address
+    }
+
+    // Render current game's children
+    let childrenHTML = ''
+    if (totalChildren > 0) {
+      let childLinks = ''
+      for (let i = 0; i < totalChildren; i++) {
+        const childAddress = await PyramidGame.children(i)
+        childLinks += await renderGameTree(childAddress)
+      }
+      childrenHTML = `
+        <div>
+          <h3 style="text-align: center;">Children</h3>
+          <div style="margin-bottom: 1em;">
+            ${childLinks}
+          </div>
+        </div>
+      `
+    }
+
+    console.log(totalChildren, parentGameHTML)
+
+    if (totalChildren > 0 || parentGameHTML) {
+      $.id('childGames').innerHTML = parentGameHTML + childrenHTML
+
+    } else if (parentGameHTML) {
+      $.id('childGames').innerHTML = parentGameHTML
+
+    } else {
+      // No parent or children - hide the section
+      $.id('childGames').innerHTML = ''
+    }
+
+    // Wire up create child game button
+    const createChildBtn = $.id('createChildBtn')
+    if (createChildBtn) {
+      createChildBtn.onclick = handleTx(async () => {
+        const amount = parseFloat($.id('createChildInput').value)
+        if (!amount || amount <= 0) {
+          throw new Error('Invalid amount')
+        }
+
+        // Generate child names/symbols automatically
+        const parentName = await PyramidGame.name()
+        const parentSymbol = await PyramidGame.symbol()
+        const parentLeaderboard = await PyramidGame.leaderboard()
+        const leaderboardContract = await provider.contract(parentLeaderboard, CONTRACTS.PyramidGameLeaderboard.abi)
+        const parentLeaderSymbol = await leaderboardContract.symbol()
+
+        const childIndex = Number(await PyramidGame.totalChildren()) + 1
+        const childNumber = String(childIndex)
+
+        // Check if parent has a number suffix
+        const hasNumberSuffix = /\d$/.test(parentSymbol)
+
+        let gameName, tokenSymbol, leaderSymbol
+
+        if (hasNumberSuffix) {
+          // Use dot notation for children of children
+          gameName = `${parentName}.${childNumber}`
+          tokenSymbol = `${parentSymbol}.${childNumber}`
+          leaderSymbol = `${parentLeaderSymbol}.${childNumber}`
+        } else {
+          // First level children
+          gameName = `${parentName} ${childNumber}`
+          tokenSymbol = `${parentSymbol}${childNumber}`
+          leaderSymbol = `${parentLeaderSymbol}${childNumber}`
+        }
+
+        return await PyramidGame.deployChildPyramidGame(gameName, tokenSymbol, leaderSymbol, txValue(amount))
+      }, 'createChildError')
+    }
+
     addEtherscanLinks('scanlink', 'PyramidGame', chainName)
+    resetColors()
   }
 
-  provider.onConnect(renderPage)
+  // Load custom game from URL parameter, then render
+  provider.onConnect(async (addr) => {
+    await loadCustomGame()
+    renderPage(addr)
+  })
 
 
 
-export const setColor = (c, v) => {
-  const r = document.querySelector(':root')
-  r.style.setProperty(c, v)
-}
+  export const setColor = (c, v) => {
+    const r = document.querySelector(':root')
+    r.style.setProperty(c, v)
+  }
 
 
-let colorList = []
+  let colorList = []
 
-function resetColors() {
+  function resetColors() {
   const colors = [
    'var(--green-color)',
    'var(--black-color)',
@@ -1622,9 +1989,11 @@ function resetColors() {
   if (colors[1] === 'var(--red-color)') {
     setColor('--gray-color', '#0e413c')
   } else if (colors[1] === 'var(--blue-color)') {
-    setColor('--gray-color', '#8aa5a2')
+    setColor('--gray-color', '#27887e')
   } else if (colors[1] === 'var(--green-color)') {
     setColor('--gray-color', '#5c7471')
+  } else {
+    setColor('--gray-color', '#a1bebb')
   }
 
   if (colorList[0] === colors[0]) resetColors()
@@ -1633,7 +2002,6 @@ function resetColors() {
 
 }
 
-resetColors()
 
 $.id('logo').onclick = resetColors
 

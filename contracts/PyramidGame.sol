@@ -26,7 +26,7 @@ by steviep.eth
 
 import "./Dependencies.sol";
 import "./PyramidGameLeaderboard.sol";
-import "./PyramidGameWallet.sol";
+import "./PyramidGameLeaderboardWallet.sol";
 
 
 pragma solidity ^0.8.30;
@@ -53,7 +53,7 @@ contract PyramidGame is ERC20 {
   PyramidGameLeaderboard public leaderboard;
 
   /// @notice The Wallet contract controlled by majority of leaders for governance actions
-  PyramidGameWallet public wallet;
+  PyramidGameLeaderboardWallet public wallet;
 
   /// @notice Array of child pyramid game addresses deployed from this pyramid
   address[] public children;
@@ -114,7 +114,7 @@ contract PyramidGame is ERC20 {
     string memory nftSymbol = bytes(leaderSymbol).length > 0 ? leaderSymbol : "LEADER";
 
     leaderboard = new PyramidGameLeaderboard(deployer, SLOTS, msg.value, nftName, nftSymbol);
-    wallet = new PyramidGameWallet{value: msg.value}(address(this), address(leaderboard), payable(msg.sender));
+    wallet = new PyramidGameLeaderboardWallet{value: msg.value}(address(this), address(leaderboard), payable(msg.sender));
 
     emit Contribution(msg.sender, msg.value);
   }
@@ -329,7 +329,7 @@ contract PyramidGame is ERC20 {
   /// @notice Update the wallet contract to a new address
   /// @dev Can only be called by the current wallet (via multisig governance). Allows upgrading wallet logic.
   /// @param newWallet The address of the new wallet contract
-  function updateWallet(PyramidGameWallet newWallet) external {
+  function updateWallet(PyramidGameLeaderboardWallet newWallet) external {
     require(msg.sender == address(wallet), 'Only the wallet can perform this action');
     wallet = newWallet;
   }

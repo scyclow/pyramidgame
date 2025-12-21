@@ -426,7 +426,7 @@ describe('PyramidGame', () => {
 
       await expectRevert(
         PGL(signers[1]).setRecipient(0, signers[1].address),
-        'Only token owner can perform this action'
+        'Only token owner or approved operator can perform this action'
       )
     })
 
@@ -495,8 +495,8 @@ describe('PyramidGame', () => {
       await PG(signers[7]).contribute(txValue(0.7))
 
       // Deploy a new TokenURI contract to use as the new URI
-      const TokenURIFactory = await ethers.getContractFactory('TokenURI', signers[0])
-      const newURI = await TokenURIFactory.deploy()
+      const PyramidGameLeaderboardTokenURIFactory = await ethers.getContractFactory('PyramidGameLeaderboardTokenURI', signers[0])
+      const newURI = await PyramidGameLeaderboardTokenURIFactory.deploy()
       await newURI.deployed()
 
       // Get the current URI to verify it changes
@@ -506,7 +506,7 @@ describe('PyramidGame', () => {
       // Test 1: Single leader cannot update URI directly
       await expect(
         PGL(signers[0]).updateURI(newURI.address)
-      ).to.be.revertedWith('Only the root wallet can perform this action')
+      ).to.be.revertedWith('Only the Leaderboard wallet can perform this action')
 
       // Test 2: Leaders can collectively update URI through wallet
       const wallet = await PyramidGame.wallet()
@@ -540,8 +540,8 @@ describe('PyramidGame', () => {
       }
 
       // Execute the transaction through the wallet
-      const PyramidGameWallet = await ethers.getContractAt('PyramidGameWallet', wallet)
-      await PyramidGameWallet.executeLeaderTransaction(
+      const PyramidGameLeaderboardWallet = await ethers.getContractAt('PyramidGameLeaderboardWallet', wallet)
+      await PyramidGameLeaderboardWallet.executeLeaderTransaction(
         target,
         value,
         data,
@@ -570,8 +570,8 @@ describe('PyramidGame', () => {
       await PG(signers[11]).contribute(txValue(1.1))
 
       // Deploy a new TokenURI contract to use as the new URI
-      const TokenURIFactory = await ethers.getContractFactory('TokenURI', signers[0])
-      const newURI = await TokenURIFactory.deploy()
+      const PyramidGameLeaderboardTokenURIFactory = await ethers.getContractFactory('PyramidGameLeaderboardTokenURI', signers[0])
+      const newURI = await PyramidGameLeaderboardTokenURIFactory.deploy()
       await newURI.deployed()
 
       const wallet = await PyramidGame.wallet()
@@ -604,9 +604,9 @@ describe('PyramidGame', () => {
       }
 
       // Execute should fail with insufficient votes
-      const PyramidGameWallet = await ethers.getContractAt('PyramidGameWallet', wallet)
+      const PyramidGameLeaderboardWallet = await ethers.getContractAt('PyramidGameLeaderboardWallet', wallet)
       await expect(
-        PyramidGameWallet.executeLeaderTransaction(
+        PyramidGameLeaderboardWallet.executeLeaderTransaction(
           target,
           value,
           data,
@@ -640,8 +640,8 @@ describe('PyramidGame', () => {
       ).to.be.revertedWith('Only the wallet can perform this action')
 
       // Test 2: Deploy a new wallet contract to use as the new wallet
-      const PyramidGameWalletFactory = await ethers.getContractFactory('PyramidGameWallet', signers[0])
-      const newWallet = await PyramidGameWalletFactory.deploy(
+      const PyramidGameLeaderboardWalletFactory = await ethers.getContractFactory('PyramidGameLeaderboardWallet', signers[0])
+      const newWallet = await PyramidGameLeaderboardWalletFactory.deploy(
         PyramidGame.address,
         PyramidGameLeaderboard.address,
         signers[0].address // parent - just use signers[0] for testing
@@ -676,8 +676,8 @@ describe('PyramidGame', () => {
       }
 
       // Execute the transaction through the old wallet
-      const PyramidGameWallet = await ethers.getContractAt('PyramidGameWallet', oldWallet)
-      await PyramidGameWallet.executeLeaderTransaction(
+      const PyramidGameLeaderboardWallet = await ethers.getContractAt('PyramidGameLeaderboardWallet', oldWallet)
+      await PyramidGameLeaderboardWallet.executeLeaderTransaction(
         target,
         value,
         data,
@@ -692,8 +692,8 @@ describe('PyramidGame', () => {
       expect(updatedWallet).to.not.equal(oldWallet)
 
       // Test 3: New wallet can successfully update the URI contract
-      const TokenURIFactory = await ethers.getContractFactory('TokenURI', signers[0])
-      const newURI = await TokenURIFactory.deploy()
+      const PyramidGameLeaderboardTokenURIFactory = await ethers.getContractFactory('PyramidGameLeaderboardTokenURI', signers[0])
+      const newURI = await PyramidGameLeaderboardTokenURIFactory.deploy()
       await newURI.deployed()
 
       const oldURI = await PyramidGameLeaderboard.uri()
@@ -750,8 +750,8 @@ describe('PyramidGame', () => {
       expect(totalSupply).to.equal(4)
 
       // Deploy a new TokenURI contract to test with
-      const TokenURIFactory = await ethers.getContractFactory('TokenURI', signers[0])
-      const newURI = await TokenURIFactory.deploy()
+      const PyramidGameLeaderboardTokenURIFactory = await ethers.getContractFactory('PyramidGameLeaderboardTokenURI', signers[0])
+      const newURI = await PyramidGameLeaderboardTokenURIFactory.deploy()
       await newURI.deployed()
 
       const wallet = await PyramidGame.wallet()
@@ -784,8 +784,8 @@ describe('PyramidGame', () => {
       }
 
       // Execute should succeed with 3 out of 4 signatures
-      const PyramidGameWallet = await ethers.getContractAt('PyramidGameWallet', wallet)
-      await PyramidGameWallet.executeLeaderTransaction(
+      const PyramidGameLeaderboardWallet = await ethers.getContractAt('PyramidGameLeaderboardWallet', wallet)
+      await PyramidGameLeaderboardWallet.executeLeaderTransaction(
         target,
         value,
         data,

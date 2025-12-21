@@ -11,6 +11,7 @@ export const CONTRACTS = {
     abi: [
       'event Contribution(address indexed sender, uint256 amount)',
       'event Distribution(address indexed recipient, uint256 amount)',
+      'event ChildPyramidDeployed(address indexed childAddress, address indexed deployer, uint256 amount)',
       'function contribute() external payable',
       'function claimLeaderboardSlot() external',
       'function addToLeaderContributionBalance(uint256 tokenId, uint256 tokenAmount) external',
@@ -23,6 +24,13 @@ export const CONTRACTS = {
       'function transferFrom(address from, address to, uint256 amount) public returns (bool)',
       'function totalSupply() public view returns (uint256)',
       'function executeLeaderTransaction(address target, uint256 value, bytes calldata data, uint256 txNonce, uint256[] calldata leaderTokenIds, bytes[] calldata signatures) external',
+      'function name() public view returns (string)',
+      'function symbol() public view returns (string)',
+      'function totalChildren() external view returns (uint256)',
+      'function children(uint256 index) external view returns (address)',
+      'function deployChildPyramidGame(string gameName, string tokenSymbol, string leaderSymbol) external payable returns (address)',
+      'function wallet() external view returns (address)',
+      'function parent() external view returns (address)',
     ]
   },
   PyramidGameLeaderboard: {
@@ -44,10 +52,11 @@ export const CONTRACTS = {
       'function balanceOf(address owner) external view returns (uint256)',
       'function transferFrom(address from, address to, uint256 tokenId) external',
       'function approve(address to, uint256 tokenId) external',
-      'function getApproved(uint256 tokenId) external view returns (address)'
+      'function getApproved(uint256 tokenId) external view returns (address)',
+      'function symbol() external view returns (string)'
     ]
   },
-  PyramidGameWallet: {
+  PyramidGameLeaderboardWallet: {
     addr: {
       local: '0xa06B7221053C11A19fbeeE1297aBc83F1BA0d7A3',
       sepolia: '',
