@@ -795,7 +795,7 @@
   </section>
 
   <!-- 4. GET STARTED / Connected User Info -->
-  <section>
+  <section id="yourAssets">
     <connect-wallet>
 <!--       <div slot="notConnected" class="center-v" style="margin: 2em auto;">
         <connect-button>
@@ -1031,6 +1031,7 @@
   import {provider, etherscanAddr, addEtherscanLinks, ethVal, txValue} from './eth.js'
   import {CONTRACTS} from './contracts.js'
   import {$, queryParams} from './$.js'
+  import {simulateDistributions} from './distributionSimulator.js'
 
   // Store original root game addresses before any modifications
   const ROOT_GAME_ADDRESSES = {
@@ -1365,6 +1366,23 @@
     // Get user's ERC20 balance
     const erc20Balance = ethVal(await PyramidGame.balanceOf(addr))
 
+    // Fetch events once for both simulation and rendering
+    const contributionEvents = await provider.contractEvents(PyramidGame, 'Contribution', [])
+    const transferEvents = await provider.contractEvents(PyramidGameLeaderboard, 'Transfer', [])
+
+    // Get parent address to handle initial contribution correctly
+    let parentAddress = null
+    try {
+      parentAddress = await PyramidGame.parent()
+    } catch (e) {
+      // Parent function may not exist on older contracts
+    }
+
+    // Simulate distributions to calculate sent/received totals
+    const { sentTotals, receivedTotals } = simulateDistributions(contributionEvents, transferEvents, activeLeaderse, parentAddress)
+    const userSent = sentTotals[addr.toLowerCase()] || 0
+    const userReceived = receivedTotals[addr.toLowerCase()] || 0
+
     const userIsLeader = userTokens.length > 0
     const getProjection = calculateProjection(sortedLeaders, leaderContributionTotal)
 
@@ -1444,13 +1462,16 @@
 
     // === 4. Connected User Info ===
     const userTotalContribution = userTokens.reduce((sum, t) => sum + t.contribution, 0) + erc20Balance
-    const userPercentage = userTotalContribution > 0 ? (userTotalContribution / totalContributed) * 100 : 0
+    const userPercentage = userSent > 0 ? (userSent / totalContributed) * 100 : 0
 
-    $.id('connectedUserInfo').innerHTML = (userIsLeader || erc20Balance > 0) ? `
+    $.id('connectedUserInfo').innerHTML = (userIsLeader || erc20Balance > 0 || userSent > 0 || userReceived > 0) ? `
       <div class="center-v">
         <h2 class="section-title">Your Assets</h2>
-        ${userTotalContribution > 0 ? `
-          <h3>Total Sent: <span style="margin-right: 0.25em">Ξ</span>${userTotalContribution.toFixed(4)}</h3>
+        ${userReceived > 0 ? `
+          <h3>Total Received: <span style="margin-right: 0.25em">Ξ</span>${userReceived.toFixed(4)}</h3>
+        ` : ''}
+        ${userSent > 0 ? `
+          <h3>Total Sent: <span style="margin-right: 0.25em">Ξ</span>${userSent.toFixed(4)}</h3>
           <p>This is ${userPercentage.toFixed(2)}% of all contributions made</p>
         ` : ''}
         ${userIsLeader ? `
@@ -1857,8 +1878,7 @@
     }
 
 
-    // Fetch and render contribution events
-    const contributionEvents = await provider.contractEvents(PyramidGame, 'Contribution', [])
+    // Render contribution events (already fetched earlier)
     const allContributions = contributionEvents.slice().reverse() // All contributions, most recent first
 
     if (allContributions.length > 0) {

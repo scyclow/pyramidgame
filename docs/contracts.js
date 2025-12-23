@@ -40,6 +40,7 @@ export const CONTRACTS = {
       mainnet: '0xD1769D7738d729EE76bbd747823c2ca256d299f9'
     },
     abi: [
+      'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
       'event MetadataUpdate(uint256 _tokenId)',
       'function ownerOf(uint256 tokenId) external view returns (address)',
       'function tokenURI(uint256 tokenId) external view returns (string)',
