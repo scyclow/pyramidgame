@@ -89,6 +89,12 @@
 
     .dashboard-table a {
       color: var(--font-color);
+      text-decoration: none;
+    }
+
+    a {
+      color: var(--font-color);
+      text-decoration: none;
     }
 
     .leader-badge {
@@ -186,7 +192,36 @@
   provider.setContractInfo(CONTRACTS)
   addEtherscanLinks('scanlink', 'PyramidGame')
 
+  const timeAgo = timestamp => {
+    const now = Date.now()
+    const diff = Math.floor((now - timestamp) / 1000)
+
+    if (diff < 60) return `${diff} second${diff === 1 ? '' : 's'} ago`
+    if (diff < 3600) {
+      const mins = Math.floor(diff / 60)
+      return `${mins} minute${mins === 1 ? '' : 's'} ago`
+    }
+    if (diff < 86400) {
+      const hours = Math.floor(diff / 3600)
+      return `${hours} hour${hours === 1 ? '' : 's'} ago`
+    }
+    if (diff < 31536000) {
+      const days = Math.floor(diff / 86400)
+      return `${days} day${days === 1 ? '' : 's'} ago`
+    }
+    const years = Math.floor(diff / 31536000)
+    return `${years} year${years === 1 ? '' : 's'} ago`
+  }
+
+  const formatTimestamp = date => {
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    const seconds = date.getSeconds().toString().padStart(2, '0')
+    return `${hours}:${minutes}:${seconds}`
+  }
+
   async function renderDashboard() {
+    const refreshTime = new Date()
     const { PyramidGame } = await provider.getContracts()
     const { name: chainName, etherscanLink } = await provider.getNetwork()
 
@@ -319,13 +354,34 @@
     `
     $.id('stats').style.display = 'flex'
 
+    // Get latest contribution
+    let latestContributionHTML = ''
+    if (contributionEvents.length > 0) {
+      const latestContribution = contributionEvents[contributionEvents.length - 1]
+      const block = await provider.provider.getBlock(latestContribution.blockNumber)
+      const timestamp = block.timestamp * 1000
+      const prettyAddr = await provider.formatAddr(latestContribution.sender, true)
+      const amount = ethVal(latestContribution.amount)
+
+      latestContributionHTML = `
+        <div style='margin-bottom: 1em; font-size: 0.7em;'>
+          <div style='margin-bottom: 0.25em;'>
+            <strong>Latest Contribution:</strong> ${etherscanAddr(etherscanLink, latestContribution.sender, prettyAddr)} sent ${amount.toFixed(4)} Ξ ${timeAgo(timestamp)}
+          </div>
+          <div style='opacity: 0.7;'>
+            Last refreshed at ${formatTimestamp(refreshTime)}
+          </div>
+        </div>
+      `
+    }
+
     // Render table
-    renderTable(participants, etherscanLink, chainName)
+    renderTable(participants, etherscanLink, chainName, latestContributionHTML)
   }
 
   let currentSort = { column: 'sent', direction: 'desc' }
 
-  function renderTable(participants, etherscanLink, chainName) {
+  function renderTable(participants, etherscanLink, chainName, latestContributionHTML = '') {
     const sortedParticipants = [...participants].sort((a, b) => {
       const { column, direction } = currentSort
       let aVal = a[column]
@@ -362,6 +418,7 @@
     `).join('')
 
     $.id('dashboard-content').innerHTML = `
+      ${latestContributionHTML}
       <table class='dashboard-table'>
         <thead>
           <tr>
@@ -389,7 +446,7 @@
           currentSort.column = column
           currentSort.direction = 'desc'
         }
-        renderTable(participants, etherscanLink, chainName)
+        renderTable(participants, etherscanLink, chainName, latestContributionHTML)
       }
     })
 
@@ -399,6 +456,11 @@
   provider.onConnect(async () => {
     await loadCustomGame()
     await renderDashboard()
+
+    // Auto-refresh every 30 seconds
+    setInterval(async () => {
+      await renderDashboard()
+    }, 30000)
   })
 </script>
 
